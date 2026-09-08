@@ -183,7 +183,6 @@ end
 
 local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
-local autoEquipButton = makeButton("AutoEquipButton", "Auto-Equip Aura: OFF", 150)
 
 local attemptsLabel = Instance.new("TextLabel")
 attemptsLabel.Name = "AttemptsLabel"
@@ -326,7 +325,7 @@ end)
 
 local contextMenu = Instance.new("Frame")
 contextMenu.Name = "PathContextMenu"
-contextMenu.Size = UDim2.fromOffset(200, 84)
+contextMenu.Size = UDim2.fromOffset(200, 126)
 contextMenu.BackgroundColor3 = Color3.fromRGB(12, 14, 20)
 contextMenu.BackgroundTransparency = 0.15
 contextMenu.BorderSizePixel = 0
@@ -1132,6 +1131,7 @@ autoEquipButton.MouseButton1Click:Connect(function()
     autoEquipEnabled = not autoEquipEnabled
     updateMenuTexts()
 end)
+
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if contextMenu.Visible then

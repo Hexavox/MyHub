@@ -54,6 +54,7 @@ autoEquipButton.MouseButton1Click:Connect(function()
     autoEquipEnabled = not autoEquipEnabled
     updateMenuTexts()
 end)
+
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if contextMenu.Visible then
