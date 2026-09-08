@@ -57,7 +57,7 @@ end)
 
 autoDeviceButton.MouseButton1Click:Connect(function()
     autoDeviceEnabled = not autoDeviceEnabled
-    updateMenuTexts()
+    updateDeviceToggle()
 end)
 
 UserInputService.InputBegan:Connect(function(input)
