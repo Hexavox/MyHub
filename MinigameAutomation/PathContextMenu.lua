@@ -45,6 +45,22 @@ autoJumpButton.ZIndex = 21
 autoJumpButton.Parent = contextMenu
 addCorner(autoJumpButton, 8)
 
+local autoEquipButton = Instance.new("TextButton")
+autoEquipButton.Name = "AutoEquipButton"
+autoEquipButton.Size = UDim2.new(1, -10, 0, 34)
+autoEquipButton.Position = UDim2.fromOffset(5, 83)
+autoEquipButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+autoEquipButton.BackgroundTransparency = 0.94
+autoEquipButton.BorderSizePixel = 0
+autoEquipButton.TextColor3 = Color3.fromRGB(230, 235, 245)
+autoEquipButton.Font = Enum.Font.GothamMedium
+autoEquipButton.TextSize = 11
+autoEquipButton.TextXAlignment = Enum.TextXAlignment.Left
+autoEquipButton.AutoButtonColor = false
+autoEquipButton.ZIndex = 21
+autoEquipButton.Parent = contextMenu
+addCorner(autoEquipButton, 8)
+
 local function updateMenuTexts()
     viewPathButton.Text = viewPathEnabled
         and "   ✓   View Pathfind Path"
@@ -53,6 +69,10 @@ local function updateMenuTexts()
     autoJumpButton.Text = autoJumpEnabled
         and "   ✓   Constant Auto-Jump"
         or "   □   Constant Auto-Jump"
+
+    autoEquipButton.Text = autoEquipEnabled
+        and "   ✓   Auto-Equip Aura"
+        or "   □   Auto-Equip Aura"
 end
 
 updateMenuTexts()
