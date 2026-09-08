@@ -29,6 +29,7 @@ local boxesEnabled = true
 local pathfindingEnabled = false
 local viewPathEnabled = false
 local autoJumpEnabled = true
+local autoEquipEnabled = false
 
 local trackedWatermelons = {}
 
@@ -902,7 +903,7 @@ local playerGui = player:WaitForChild("PlayerGui", 10)
 
 
 -- ===== EquipHelpers.lua =====
--- CLICK HELPERS (SAME STYLE AS WATERMELON BOT)
+-- CLICK HELPERS
 
 
 local function clickGuiObject(obj)
@@ -1025,23 +1026,57 @@ end
 
 
 -- ===== AutoEquipScanner.lua =====
--- PERIODIC CHECK (TICKET SCANNER STYLE)
+-- PERIODIC CHECK (CALL THIS FROM YOUR MENU)
 
 
-task.spawn(function()
-	local mainInterface = playerGui:WaitForChild("MainInterface", 10)
-	if not mainInterface then
-		return
+local autoEquipEnabled = false
+local autoEquipToken = 0
+
+
+local function startAutoEquip()
+	autoEquipEnabled = true
+	autoEquipToken += 1
+	local token = autoEquipToken
+
+
+	task.spawn(function()
+		local mainInterface = playerGui:WaitForChild("MainInterface", 10)
+		if not mainInterface then
+			return
+		end
+
+
+		while autoEquipEnabled and token == autoEquipToken do
+			task.wait(CHECK_INTERVAL)
+
+
+			if autoEquipEnabled and token == autoEquipToken then
+				tryEquipAbyssalHunter()
+			end
+		end
+	end)
+end
+
+
+local function stopAutoEquip()
+	autoEquipEnabled = false
+	autoEquipToken += 1
+end
+
+
+local function setAutoEquip(enabled)
+	if enabled then
+		startAutoEquip()
+	else
+		stopAutoEquip()
 	end
+end
 
 
-	while true do
-		task.wait(CHECK_INTERVAL)
-
-
-		tryEquipAbyssalHunter()
-	end
-end)
+return {
+	SetAutoEquip = setAutoEquip,
+	TryEquipNow = tryEquipAbyssalHunter,
+}
 
 -- ===== PathfindingEngine.lua =====
 -- PATHFINDING & UNSTUCK ENGINE
