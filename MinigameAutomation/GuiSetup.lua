@@ -45,6 +45,18 @@ statusLabel.TextSize = 11
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
 statusLabel.Parent = frame
 
+local attemptsLabel = Instance.new("TextLabel")
+attemptsLabel.Name = "AttemptsLabel"
+attemptsLabel.Size = UDim2.new(1, -24, 0, 18)
+attemptsLabel.Position = UDim2.fromOffset(12, 50)
+attemptsLabel.BackgroundTransparency = 1
+attemptsLabel.Text = "⚠ 0 Attempts"
+attemptsLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+attemptsLabel.Font = Enum.Font.GothamMedium
+attemptsLabel.TextSize = 11
+attemptsLabel.TextXAlignment = Enum.TextXAlignment.Center
+attemptsLabel.Parent = frame
+
 local function makeButton(name, text, positionY)
     local button = Instance.new("TextButton")
     button.Name = name
@@ -67,18 +79,6 @@ end
 local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
 local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 162)
-
-local attemptsLabel = Instance.new("TextLabel")
-attemptsLabel.Name = "AttemptsLabel"
-attemptsLabel.Size = UDim2.new(1, -20, 0, 18)
-attemptsLabel.Position = UDim2.fromOffset(10, 148)
-attemptsLabel.BackgroundTransparency = 1
-attemptsLabel.Text = "⚠ 0 Attempts"
-attemptsLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
-attemptsLabel.Font = Enum.Font.GothamMedium
-attemptsLabel.TextSize = 11
-attemptsLabel.TextXAlignment = Enum.TextXAlignment.Center
-attemptsLabel.Parent = frame
 
 local dropdownArrow = Instance.new("TextLabel")
 dropdownArrow.Name = "DropdownArrow"
