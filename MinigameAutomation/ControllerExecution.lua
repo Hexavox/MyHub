@@ -55,6 +55,11 @@ autoEquipButton.MouseButton1Click:Connect(function()
     updateMenuTexts()
 end)
 
+autoDeviceButton.MouseButton1Click:Connect(function()
+    autoDeviceEnabled = not autoDeviceEnabled
+    updateMenuTexts()
+end)
+
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if contextMenu.Visible then

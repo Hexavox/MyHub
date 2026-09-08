@@ -184,6 +184,7 @@ end
 
 local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
+local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 162)
 
 local attemptsLabel = Instance.new("TextLabel")
 attemptsLabel.Name = "AttemptsLabel"
@@ -385,6 +386,22 @@ autoEquipButton.ZIndex = 21
 autoEquipButton.Parent = contextMenu
 addCorner(autoEquipButton, 8)
 
+local autoDeviceButton = Instance.new("TextButton")
+autoDeviceButton.Name = "AutoDeviceButton"
+autoDeviceButton.Size = UDim2.new(1, -10, 0, 34)
+autoDeviceButton.Position = UDim2.fromOffset(5, 122)
+autoDeviceButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+autoDeviceButton.BackgroundTransparency = 0.94
+autoDeviceButton.BorderSizePixel = 0
+autoDeviceButton.TextColor3 = Color3.fromRGB(230, 235, 245)
+autoDeviceButton.Font = Enum.Font.GothamMedium
+autoDeviceButton.TextSize = 11
+autoDeviceButton.TextXAlignment = Enum.TextXAlignment.Left
+autoDeviceButton.AutoButtonColor = false
+autoDeviceButton.ZIndex = 21
+autoDeviceButton.Parent = contextMenu
+addCorner(autoDeviceButton, 8)
+
 local function updateMenuTexts()
     viewPathButton.Text = viewPathEnabled
         and "   ✓   View Pathfind Path"
@@ -397,6 +414,10 @@ local function updateMenuTexts()
     autoEquipButton.Text = autoEquipEnabled
         and "   ✓   Auto-Equip Aura"
         or "   □   Auto-Equip Aura"
+
+    autoDeviceButton.Text = autoDeviceEnabled
+        and "   ✓   Auto-Device"
+        or "   □   Auto-Device"
 end
 
 updateMenuTexts()
@@ -846,8 +867,8 @@ end
 
 
 local AUTO_EQUIP_AURA_NAME = "Abyssal Hunter"
-local AUTO_EQUIP_SCAN_INTERVAL = 300
-local AUTO_EQUIP_RETRY_INTERVAL = 5
+local AUTO_EQUIP_SCAN_INTERVAL = 1000
+local AUTO_EQUIP_RETRY_INTERVAL = 30
 local AUTO_EQUIP_MENU_WAIT = 2
 
 
@@ -891,8 +912,8 @@ local function getAuraPanel()
     end
 
 
-    -- Kept from the path you provided.
-    local auraPanel = mainInterface:GetChildren()[61]
+    local interfaceChildren = mainInterface:GetChildren()
+    local auraPanel = interfaceChildren[61]
     if not auraPanel or not auraPanel:IsA("GuiObject") then
         return nil
     end
@@ -904,7 +925,12 @@ end
 
 local function isAuraMenuOpen()
     local auraPanel = getAuraPanel()
-    return auraPanel and auraPanel.Visible or false
+    if not auraPanel then
+        return false
+    end
+
+
+    return auraPanel.Visible
 end
 
 
@@ -921,9 +947,9 @@ local function findAurasSideButton()
     end
 
 
-    for _, object in ipairs(sideButtons:GetChildren()) do
-        if object:IsA("TextButton") or object:IsA("ImageButton") then
-            local usageLabel = object:FindFirstChild("Usage", true)
+    for _, button in ipairs(sideButtons:GetChildren()) do
+        if button:IsA("TextButton") or button:IsA("ImageButton") then
+            local usageLabel = button:FindFirstChild("Usage", true)
 
 
             if usageLabel
@@ -931,7 +957,7 @@ local function findAurasSideButton()
                 and usageLabel.Text == "Auras" then
 
 
-                return object
+                return button
             end
         end
     end
@@ -942,6 +968,8 @@ end
 
 
 local function openAurasMenu()
+    -- Never click the Aura side button when its panel is already open.
+    -- That prevents it from toggling itself closed.
     if isAuraMenuOpen() then
         return true, false
     end
@@ -996,7 +1024,8 @@ local function getAuraScrollingFrame()
     end
 
 
-    local auraListContainer = auraPanel:GetChildren()[4]
+    local auraPanelChildren = auraPanel:GetChildren()
+    local auraListContainer = auraPanelChildren[4]
     if not auraListContainer then
         return nil
     end
@@ -1012,10 +1041,28 @@ local function getAuraScrollingFrame()
 end
 
 
+local function getAuraNameFromButton(button)
+    if not button then
+        return nil
+    end
+
+
+    for _, object in ipairs(button:GetDescendants()) do
+        if object:IsA("TextLabel") and object.Text == AUTO_EQUIP_AURA_NAME then
+            return object.Text
+        end
+    end
+
+
+    return nil
+end
+
+
 local function scanForAbyssalHunterButton()
     local scrollingFrame = getAuraScrollingFrame()
     if not scrollingFrame then
         cachedAbyssalHunterButton = nil
+        lastAuraScan = os.clock()
         return nil
     end
 
@@ -1025,15 +1072,7 @@ local function scanForAbyssalHunterButton()
 
     for _, button in ipairs(scrollingFrame:GetChildren()) do
         if button:IsA("TextButton") or button:IsA("ImageButton") then
-            local auraName = nil
-
-
-            for _, object in ipairs(button:GetDescendants()) do
-                if object:IsA("TextLabel") and object.Text == AUTO_EQUIP_AURA_NAME then
-                    auraName = object.Text
-                    break
-                end
-            end
+            local auraName = getAuraNameFromButton(button)
 
 
             if auraName and not seenAuraNames[auraName] then
@@ -1069,7 +1108,8 @@ local function getEquipButton()
     end
 
 
-    local equipContainer = detailsFrame:GetChildren()[5]
+    local detailsChildren = detailsFrame:GetChildren()
+    local equipContainer = detailsChildren[5]
     if not equipContainer then
         return nil
     end
@@ -1088,7 +1128,12 @@ local function getEquipButton()
 
 
     local textLabel = imageButton:FindFirstChild("TextLabel")
-    if not textLabel or textLabel.Text ~= "Equip" then
+    if not textLabel then
+        return nil
+    end
+
+
+    if textLabel.Text ~= "Equip" then
         return nil
     end
 
@@ -1118,13 +1163,14 @@ end
 
 
 local function tryEquipAbyssalHunter()
-    if not autoEquipEnabled then
+    -- Auto-equip only runs when BOTH options are enabled.
+    if not autoEquipEnabled or not pathfindingEnabled then
         return false
     end
 
 
-    local menuWasOpened, openedByScript = openAurasMenu()
-    if not menuWasOpened then
+    local menuOpened, openedByScript = openAurasMenu()
+    if not menuOpened then
         return false
     end
 
@@ -1156,8 +1202,8 @@ local function tryEquipAbyssalHunter()
     end
 
 
-    -- Only close the Aura panel if it was closed before the auto-equip ran.
-    -- If you had it open yourself, leave it open.
+    -- Keep the Aura menu open if YOU were already using it.
+    -- Close it only when this script had to open it itself.
     if openedByScript then
         closeAurasMenu()
     end
@@ -1169,7 +1215,7 @@ end
 
 task.spawn(function()
     while screenGui.Parent do
-        if autoEquipEnabled then
+        if autoEquipEnabled and pathfindingEnabled then
             tryEquipAbyssalHunter()
         end
 
@@ -1468,6 +1514,11 @@ end)
 
 autoEquipButton.MouseButton1Click:Connect(function()
     autoEquipEnabled = not autoEquipEnabled
+    updateMenuTexts()
+end)
+
+autoDeviceButton.MouseButton1Click:Connect(function()
+    autoDeviceEnabled = not autoDeviceEnabled
     updateMenuTexts()
 end)
 

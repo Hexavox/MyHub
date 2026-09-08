@@ -66,6 +66,7 @@ end
 
 local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
+local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 162)
 
 local attemptsLabel = Instance.new("TextLabel")
 attemptsLabel.Name = "AttemptsLabel"
