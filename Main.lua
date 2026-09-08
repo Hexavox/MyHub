@@ -1402,6 +1402,8 @@ end
 -- Start the timers
 task.spawn(runBiomeRandomizerLoop)
 task.spawn(runStrangeControllerLoop)
+useItem(BIOME_RANDOMIZER_NAME)
+useItem(STRANGE_CONTROLLER_NAME)
 
 -- ===== PathfindingEngine.lua =====
 -- PATHFINDING & UNSTUCK ENGINE
