@@ -1,7 +1,9 @@
--- Utils.lua (ModuleScript)
+-- Utils.lua
 local Workspace = game:GetService("Workspace")
-local Config = require(script.Parent.Config)
-local State = require(script.Parent.State)
+
+local Modules = _G.MinigameAutomationModules
+local Config = Modules.Config
+local State = Modules.State
 
 local Utils = {}
 

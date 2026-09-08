@@ -1,4 +1,4 @@
--- Config.lua (ModuleScript)
+-- Config.lua
 return {
 	WATERMELON_NAME = "watermelon",
 	SCAN_INTERVAL = 1,

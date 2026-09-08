@@ -1,6 +1,8 @@
--- TicketScanner.lua (ModuleScript)
+-- TicketScanner.lua
 local Players = game:GetService("Players")
-local State = require(script.Parent.State)
+
+local Modules = _G.MinigameAutomationModules
+local State = Modules.State
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -73,6 +75,10 @@ function TicketScanner.start()
 		end
 	end)
 
+	updateAttemptsUI()
+end
+
+function TicketScanner.updateAttemptsUI()
 	updateAttemptsUI()
 end
 

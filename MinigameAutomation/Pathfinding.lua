@@ -1,11 +1,13 @@
--- Pathfinding.lua (ModuleScript)
+-- Pathfinding.lua
 local Workspace = game:GetService("Workspace")
 local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
-local Config = require(script.Parent.Config)
-local State = require(script.Parent.State)
-local Utils = require(script.Parent.Utils)
+local Modules = _G.MinigameAutomationModules
+local Config = Modules.Config
+local State = Modules.State
+local Utils = Modules.Utils
 
 local Pathfinding = {}
 
@@ -26,7 +28,7 @@ local function attemptUnstuck(humanoid, rootPart)
 end
 
 function Pathfinding.walkToPosition(targetPosition, token)
-	local character = game:GetService("Players").LocalPlayer.Character
+	local character = Players.LocalPlayer.Character
 	if not character then return false end
 
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -35,7 +37,6 @@ function Pathfinding.walkToPosition(targetPosition, token)
 
 	while shouldContinue(token) do
 		if State.consecutivePathFailures >= Config.MAX_CONSECUTIVE_FAILURES then
-			-- clickGiveUpButton will be called from Automation
 			return false
 		end
 

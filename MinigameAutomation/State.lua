@@ -1,5 +1,5 @@
--- State.lua (ModuleScript)
-local State = {
+-- State.lua
+return {
 	boxesEnabled = true,
 	pathfindingEnabled = false,
 	viewPathEnabled = false,
@@ -11,9 +11,7 @@ local State = {
 	activeRoutine = false,
 	consecutivePathFailures = 0,
 
-	gui = nil,          -- will hold main frame, buttons, labels, etc.
+	gui = nil,
 	visualFolder = nil,
 	pathVisualFolder = nil,
 }
-
-return State

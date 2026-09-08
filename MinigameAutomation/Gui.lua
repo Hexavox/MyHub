@@ -1,19 +1,18 @@
--- Gui.lua (ModuleScript)
+-- Gui.lua
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
-local TweenService = game:GetService("TweenService")
 
-local Config = require(script.Parent.Config)
-local State = require(script.Parent.State)
-local Utils = require(script.Parent.Utils)
+local Modules = _G.MinigameAutomationModules
+local Config = Modules.Config
+local State = Modules.State
+local Utils = Modules.Utils
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local Gui = {}
 
--- GUI helpers
 local function addCorner(parent, radius)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius)
@@ -47,11 +46,9 @@ local function addGlassGradient(parent)
 end
 
 function Gui.create()
-	-- Clean old GUI
 	local oldGui = playerGui:FindFirstChild("WatermelonTrackerGui")
 	if oldGui then oldGui:Destroy() end
 
-	-- ScreenGui
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = "WatermelonTrackerGui"
 	screenGui.ResetOnSpawn = false
@@ -59,7 +56,6 @@ function Gui.create()
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	screenGui.Parent = playerGui
 
-	-- Main frame
 	local frame = Instance.new("Frame")
 	frame.Name = "MainFrame"
 	frame.Size = UDim2.fromOffset(240, 185)
@@ -74,7 +70,6 @@ function Gui.create()
 	addGlassStroke(frame, 0.7, 1)
 	addGlassGradient(frame)
 
-	-- Title
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "Title"
 	titleLabel.Size = UDim2.new(1, -24, 0, 28)
@@ -87,7 +82,6 @@ function Gui.create()
 	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	titleLabel.Parent = frame
 
-	-- Status
 	local statusLabel = Instance.new("TextLabel")
 	statusLabel.Name = "Status"
 	statusLabel.Size = UDim2.new(1, -24, 0, 18)
@@ -122,7 +116,6 @@ function Gui.create()
 	local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 	local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
 
-	-- Attempts label
 	local attemptsLabel = Instance.new("TextLabel")
 	attemptsLabel.Name = "AttemptsLabel"
 	attemptsLabel.Size = UDim2.new(1, -20, 0, 18)
@@ -135,7 +128,6 @@ function Gui.create()
 	attemptsLabel.TextXAlignment = Enum.TextXAlignment.Center
 	attemptsLabel.Parent = frame
 
-	-- Dropdown arrow
 	local dropdownArrow = Instance.new("TextLabel")
 	dropdownArrow.Name = "DropdownArrow"
 	dropdownArrow.Size = UDim2.fromOffset(20, 20)
@@ -147,7 +139,6 @@ function Gui.create()
 	dropdownArrow.TextSize = 10
 	dropdownArrow.Parent = togglePathButton
 
-	-- Context menu (path settings)
 	local contextMenu = Instance.new("Frame")
 	contextMenu.Name = "PathContextMenu"
 	contextMenu.Size = UDim2.fromOffset(200, 84)
@@ -223,7 +214,6 @@ function Gui.create()
 	updateBoxesToggle()
 	updatePathToggle()
 
-	-- Dragging
 	local dragging = false
 	local dragStart = nil
 	local frameStart = nil
@@ -260,7 +250,6 @@ function Gui.create()
 		end
 	end)
 
-	-- Context menu visibility toggle
 	togglePathButton.MouseButton2Click:Connect(function()
 		contextMenu.Position = UDim2.fromOffset(
 			togglePathButton.AbsolutePosition.X + togglePathButton.AbsoluteSize.X + 5,
@@ -297,7 +286,6 @@ function Gui.create()
 		end
 	end)
 
-	-- Expose important UI refs on State.gui
 	State.gui = {
 		screenGui = screenGui,
 		frame = frame,
