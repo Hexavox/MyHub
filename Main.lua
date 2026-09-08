@@ -128,7 +128,8 @@ screenGui.Parent = playerGui
 
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.fromOffset(240, 185)
+frame.Size = UDim2.fromOffset(240, 0)
+frame.AutomaticSize = Enum.AutomaticSize.Y
 frame.Position = UDim2.new(0.02, 0, 0.20, 0)
 frame.BackgroundColor3 = Color3.fromRGB(15, 17, 23)
 frame.BackgroundTransparency = 0.25
@@ -140,47 +141,59 @@ addCorner(frame, 16)
 addGlassStroke(frame, 0.7, 1)
 addGlassGradient(frame)
 
+local framePadding = Instance.new("UIPadding")
+framePadding.PaddingTop = UDim.new(0, 12)
+framePadding.PaddingBottom = UDim.new(0, 12)
+framePadding.PaddingLeft = UDim.new(0, 12)
+framePadding.PaddingRight = UDim.new(0, 12)
+framePadding.Parent = frame
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 8)
+listLayout.Parent = frame
+
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
-titleLabel.Size = UDim2.new(1, -24, 0, 28)
-titleLabel.Position = UDim2.fromOffset(12, 8)
+titleLabel.Size = UDim2.new(1, 0, 0, 20)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Watermelon Bot"
 titleLabel.TextColor3 = Color3.fromRGB(240, 243, 250)
 titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextSize = 14
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.LayoutOrder = 1
 titleLabel.Parent = frame
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Name = "Status"
-statusLabel.Size = UDim2.new(1, -24, 0, 18)
-statusLabel.Position = UDim2.fromOffset(12, 30)
+statusLabel.Size = UDim2.new(1, 0, 0, 16)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Status: Idle"
 statusLabel.TextColor3 = Color3.fromRGB(160, 168, 185)
 statusLabel.Font = Enum.Font.GothamMedium
 statusLabel.TextSize = 11
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.LayoutOrder = 2
 statusLabel.Parent = frame
 
 local attemptsLabel = Instance.new("TextLabel")
 attemptsLabel.Name = "AttemptsLabel"
-attemptsLabel.Size = UDim2.new(1, -18, 0, 18)
-attemptsLabel.Position = UDim2.fromOffset(12, 40)
+attemptsLabel.Size = UDim2.new(1, 0, 0, 16)
 attemptsLabel.BackgroundTransparency = 1
 attemptsLabel.Text = "⚠ 0 Attempts"
 attemptsLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
 attemptsLabel.Font = Enum.Font.GothamMedium
 attemptsLabel.TextSize = 11
 attemptsLabel.TextXAlignment = Enum.TextXAlignment.Center
+attemptsLabel.LayoutOrder = 3
 attemptsLabel.Parent = frame
 
-local function makeButton(name, text, positionY)
+local function makeButton(name, text, layoutOrder)
     local button = Instance.new("TextButton")
     button.Name = name
-    button.Size = UDim2.new(1, -20, 0, 38)
-    button.Position = UDim2.fromOffset(10, positionY)
+    button.Size = UDim2.new(1, 0, 0, 38)
+    button.LayoutOrder = layoutOrder
     button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     button.BackgroundTransparency = 0.92
     button.BorderSizePixel = 0
@@ -195,14 +208,14 @@ local function makeButton(name, text, positionY)
     return button
 end
 
-local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
-local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
-local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 107)
+local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 4)
+local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 5)
+local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 6)
 
 local dropdownArrow = Instance.new("TextLabel")
 dropdownArrow.Name = "DropdownArrow"
 dropdownArrow.Size = UDim2.fromOffset(30, 30)
-dropdownArrow.Position = UDim2.new(1, -24, 0.5, -10)
+dropdownArrow.Position = UDim2.new(1, -30, 0.5, -15)
 dropdownArrow.BackgroundTransparency = 1
 dropdownArrow.Text = "▼"
 dropdownArrow.TextColor3 = Color3.fromRGB(180, 190, 210)
@@ -421,6 +434,12 @@ local function updatePathToggle()
     togglePathButton.BackgroundTransparency = pathfindingEnabled and 0.84 or 0.95
 end
 
+local function updateDeviceToggle()
+    autoDeviceButton.Text = autoDeviceEnabled and "Auto-Device: ON" or "Auto-Device: OFF"
+    autoDeviceButton.BackgroundTransparency = autoDeviceEnabled and 0.84 or 0.95
+end
+
+updateDeviceToggle()
 updateBoxesToggle()
 updatePathToggle()
 
@@ -1167,12 +1186,6 @@ local STRANGE_CONTROLLER_NAME = "Item\010Strange Controller"
 
 local BIOME_INTERVAL = 30 * 60  -- 30 minutes
 local STRANGE_INTERVAL = 20 * 60  -- 20 minutes
-
--- Assumes these already exist in your script:
--- local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
--- local GuiService = game:GetService("GuiService")
--- local VirtualInputManager = game:GetService("VirtualInputManager")
--- local autoDeviceEnabled = false  -- defined alongside your other booleans
 
 local function clickGuiObject(object)
 	if not object or not object:IsA("GuiObject") then

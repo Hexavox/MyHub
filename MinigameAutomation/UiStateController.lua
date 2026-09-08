@@ -15,5 +15,11 @@ local function updatePathToggle()
     togglePathButton.BackgroundTransparency = pathfindingEnabled and 0.84 or 0.95
 end
 
+local function updateDeviceToggle()
+    autoDeviceButton.Text = autoDeviceEnabled and "Auto-Device: ON" or "Auto-Device: OFF"
+    autoDeviceButton.BackgroundTransparency = autoDeviceEnabled and 0.84 or 0.95
+end
+
+updateDeviceToggle()
 updateBoxesToggle()
 updatePathToggle()

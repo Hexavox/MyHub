@@ -6,12 +6,6 @@ local STRANGE_CONTROLLER_NAME = "Item\010Strange Controller"
 local BIOME_INTERVAL = 30 * 60  -- 30 minutes
 local STRANGE_INTERVAL = 20 * 60  -- 20 minutes
 
--- Assumes these already exist in your script:
--- local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
--- local GuiService = game:GetService("GuiService")
--- local VirtualInputManager = game:GetService("VirtualInputManager")
--- local autoDeviceEnabled = false  -- defined alongside your other booleans
-
 local function clickGuiObject(object)
 	if not object or not object:IsA("GuiObject") then
 		return false
