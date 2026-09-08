@@ -1,107 +1,66 @@
-local Players = game:GetService("Players")
-local GuiService = game:GetService("GuiService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+-- TICKET SCANNER & ATTEMPTS UPDATER
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui", 10)
-if not playerGui then return end
+local function updateAttemptsUI()
+    local mainInterface = playerGui:FindFirstChild("MainInterface")
+    if not mainInterface then
+        attemptsLabel.Text = "⚠ 0 Attempts"
+        return
+    end
 
--- CONFIG
-local CHECK_INTERVAL = 10 -- seconds
+    local itemGridScrollingFrame = mainInterface:FindFirstChild("Inventory")
+        and mainInterface.Inventory:FindFirstChild("Items")
+        and mainInterface.Inventory.Items:FindFirstChild("ItemGrid")
+        and mainInterface.Inventory.Items.ItemGrid:FindFirstChild("ItemGridScrollingFrame")
 
--- HELPERS: get card & equip button (same structure style as your ticket scanner)
-local function getAbyssalHunterCard()
-	local mainInterface = playerGui:FindFirstChild("MainInterface")
-	if not mainInterface then return nil end
+    if not itemGridScrollingFrame then
+        attemptsLabel.Text = "⚠ 0 Attempts"
+        return
+    end
 
-	-- Adjust indices if your UI changes
-	local section = mainInterface:GetChildren()[61]
-	if not section then return nil end
+    local minigameTicket = itemGridScrollingFrame:FindFirstChild("Item\010minigame_ticket") 
+        or itemGridScrollingFrame:FindFirstChild("Item\nminigame_ticket")
 
-	local frame = section:GetChildren()[4]
-	if not frame or not frame:FindFirstChild("Frame") then return nil end
+    if minigameTicket then
+        local button = minigameTicket:FindFirstChild("Button")
+        if button then
+            local itemAmount = button:FindFirstChild("ItemAmount")
+            if itemAmount then
+                local rawText = itemAmount.Text
+                local count = string.match(rawText, "%d+") or "0"
+                attemptsLabel.Text = "⚠ " .. count .. " Attempts"
+                return
+            end
+        end
+    end
 
-	local scrolling = frame.Frame:FindFirstChild("ScrollingFrame")
-	if not scrolling then return nil end
-
-	return scrolling:FindFirstChild("0.29954987813313594")
+    attemptsLabel.Text = "⚠ 0 Attempts"
 end
 
-local function getEquipButton()
-	local mainInterface = playerGui:FindFirstChild("MainInterface")
-	if not mainInterface then return nil end
-
-	local section = mainInterface:GetChildren()[61]
-	if not section or not section:FindFirstChild("Frame") then return nil end
-
-	local targetFrameChildren = section.Frame:GetChildren()
-	local frameObj = targetFrameChildren[5]
-	if not frameObj or not frameObj:FindFirstChild("Frame") then return nil end
-
-	local imageButton = frameObj.Frame:FindFirstChild("ImageButton")
-	if not imageButton or not imageButton:FindFirstChild("TextLabel") then return nil end
-
-	local label = imageButton.TextLabel
-	if label.Text == "Equip" then
-		return imageButton
-	end
-
-	return nil
-end
-
--- HELPER: click a GuiObject via VirtualInputManager (same idea as your watermelon bot)
-local function clickGuiObject(obj)
-	if not obj or not obj:IsA("GuiObject") then return false end
-
-	local pos = obj.AbsolutePosition
-	local size = obj.AbsoluteSize
-	local inset, _ = GuiService:GetGuiInset()
-
-	local clickX = pos.X + (size.X / 2) + inset.X
-	local clickY = pos.Y + (size.Y / 2) + inset.Y
-
-	VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-	task.wait(0.05)
-	VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-
-	return true
-end
-
--- MAIN: try to equip Abyssal Hunter
-local function tryEquipAbyssalHunter()
-	local card = getAbyssalHunterCard()
-	if not card then
-		-- Can't find card; maybe UI not ready or indices changed
-		return false
-	end
-
-	-- Click card
-	clickGuiObject(card)
-	task.wait(0.2)
-
-	local equipBtn = getEquipButton()
-	if not equipBtn then
-		return false
-	end
-
-	clickGuiObject(equipBtn)
-	return true
-end
-
--- TICKET-SCANNER STYLE LOOP
 task.spawn(function()
-	-- Optional: wait for MainInterface once at start
-	local mainInterface = playerGui:WaitForChild("MainInterface", 10)
-	if not mainInterface then return end
+    local mainInterface = playerGui:WaitForChild("MainInterface", 10)
+    if not mainInterface then return end
 
-	while true do
-		task.wait(CHECK_INTERVAL)
+    local itemGridScrollingFrame = mainInterface:WaitForChild("Inventory", 5)
+        and mainInterface.Inventory:WaitForChild("Items", 5)
+        and mainInterface.Inventory.Items:WaitForChild("ItemGrid", 5)
+        and mainInterface.Inventory.Items.ItemGrid:WaitForChild("ItemGridScrollingFrame", 5)
 
-		local success = tryEquipAbyssalHunter()
-		if success then
-			-- Optional: print("Equipped Abyssal Hunter")
-		else
-			-- Optional: print("Equip failed / missing")
-		end
-	end
+    if itemGridScrollingFrame then
+        local minigameTicket = itemGridScrollingFrame:FindFirstChild("Item\010minigame_ticket") 
+            or itemGridScrollingFrame:FindFirstChild("Item\nminigame_ticket")
+
+        if minigameTicket then
+            local button = minigameTicket:WaitForChild("Button", 5)
+            if button then
+                local itemAmount = button:WaitForChild("ItemAmount", 5)
+                if itemAmount then
+                    itemAmount:GetPropertyChangedSignal("Text"):Connect(function()
+                        updateAttemptsUI()
+                    end)
+                end
+            end
+        end
+    end
 end)
+
+updateAttemptsUI()

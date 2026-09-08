@@ -73,18 +73,7 @@ local function findAurasSideButton()
 end
 
 
-local function openAurasMenu()
-    local aurasSideButton = findAurasSideButton()
-    if not aurasSideButton then
-        return false
-    end
-
-
-    return clickGuiObject(aurasSideButton)
-end
-
-
-local function getAuraScrollingFrame()
+local function getAuraPanel()
     local mainInterface = playerGui:FindFirstChild("MainInterface")
     if not mainInterface then
         return nil
@@ -98,8 +87,64 @@ local function getAuraScrollingFrame()
     end
 
 
-    local auraSectionChildren = auraSection:GetChildren()
-    local auraListContainer = auraSectionChildren[4]
+    return auraSection
+end
+
+
+local function isAuraMenuOpen()
+    local auraPanel = getAuraPanel()
+    if not auraPanel or not auraPanel:IsA("GuiObject") then
+        return false
+    end
+
+
+    return auraPanel.Visible
+end
+
+
+local function openAurasMenu()
+    -- Do not click the sidebar button if Auras is already open.
+    -- Clicking it again can toggle the panel closed.
+    if isAuraMenuOpen() then
+        return true
+    end
+
+
+    local aurasSideButton = findAurasSideButton()
+    if not aurasSideButton then
+        return false
+    end
+
+
+    if not clickGuiObject(aurasSideButton) then
+        return false
+    end
+
+
+    local startedAt = os.clock()
+    while os.clock() - startedAt < 2 do
+        if isAuraMenuOpen() then
+            return true
+        end
+
+
+        task.wait(0.1)
+    end
+
+
+    return false
+end
+
+
+local function getAuraScrollingFrame()
+    local auraPanel = getAuraPanel()
+    if not auraPanel then
+        return nil
+    end
+
+
+    local auraPanelChildren = auraPanel:GetChildren()
+    local auraListContainer = auraPanelChildren[4]
     if not auraListContainer then
         return nil
     end
@@ -171,20 +216,13 @@ end
 
 
 local function getEquipButton()
-    local mainInterface = playerGui:FindFirstChild("MainInterface")
-    if not mainInterface then
+    local auraPanel = getAuraPanel()
+    if not auraPanel then
         return nil
     end
 
 
-    local interfaceChildren = mainInterface:GetChildren()
-    local auraSection = interfaceChildren[61]
-    if not auraSection then
-        return nil
-    end
-
-
-    local detailsFrame = auraSection:FindFirstChild("Frame")
+    local detailsFrame = auraPanel:FindFirstChild("Frame")
     if not detailsFrame then
         return nil
     end
@@ -225,8 +263,9 @@ local function tryEquipAbyssalHunter()
     end
 
 
-    openAurasMenu()
-    task.wait(0.35)
+    if not openAurasMenu() then
+        return false
+    end
 
 
     local abyssalHunterButton = cachedAbyssalHunterButton
@@ -253,7 +292,8 @@ local function tryEquipAbyssalHunter()
 
     local equipButton = getEquipButton()
     if not equipButton then
-        -- No "Equip" button usually means Abyssal Hunter is already equipped.
+        -- The selected aura has no button labeled "Equip".
+        -- Usually that means it is already equipped.
         return true
     end
 
