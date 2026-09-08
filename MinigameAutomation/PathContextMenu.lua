@@ -73,5 +73,6 @@ local function updateMenuTexts()
     autoEquipButton.Text = autoEquipEnabled
         and "   ✓   Auto-Equip Aura"
         or "   □   Auto-Equip Aura"
+end
 
 updateMenuTexts()
