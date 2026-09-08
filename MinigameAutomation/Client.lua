@@ -1,14 +1,15 @@
--- Client.lua (LocalScript)
+-- Client.lua
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 
-local Config = require(script.Parent.Config)
-local State = require(script.Parent.State)
-local Gui = require(script.Parent.Gui)
-local Utils = require(script.Parent.Utils)
-local TicketScanner = require(script.Parent.TicketScanner)
-local Automation = require(script.Parent.Automation)
+local Modules = _G.MinigameAutomationModules
+local Config = Modules.Config
+local State = Modules.State
+local Gui = Modules.Gui
+local Utils = Modules.Utils
+local TicketScanner = Modules.TicketScanner
+local Automation = Modules.Automation
+local Pathfinding = Modules.Pathfinding
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
