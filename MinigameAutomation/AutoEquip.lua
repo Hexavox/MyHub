@@ -2,188 +2,164 @@
 -- AUTO EQUIP ABYSSAL HUNTER
 
 
-local CHECK_INTERVAL = 10
+local AUTO_EQUIP_CHECK_INTERVAL = 10
 
 
--- ===== AutoEquipHelpers.lua =====
--- CLICK HELPERS
+local function clickGuiObject(object)
+    if not object or not object:IsA("GuiObject") then
+        return false
+    end
 
 
-local function clickGuiObject(obj)
-	if not obj or not obj:IsA("GuiObject") then
-		return false
-	end
+    if not object.Visible then
+        return false
+    end
 
 
-	local pos = obj.AbsolutePosition
-	local size = obj.AbsoluteSize
-	local inset, _ = GuiService:GetGuiInset()
+    local position = object.AbsolutePosition
+    local size = object.AbsoluteSize
+    local inset = GuiService:GetGuiInset()
 
 
-	local clickX = pos.X + (size.X / 2) + inset.X
-	local clickY = pos.Y + (size.Y / 2) + inset.Y
+    local clickX = position.X + (size.X / 2) + inset.X
+    local clickY = position.Y + (size.Y / 2) + inset.Y
 
 
-	VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-	task.wait(0.05)
-	VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
+    VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
+    task.wait(0.05)
+    VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
 
 
-	return true
+    return true
 end
 
 
--- ===== AbyssalLocator.lua =====
--- FIND ABYSSAL HUNTER CARD & EQUIP BUTTON
-
-
 local function getAbyssalHunterCard()
-	local mainInterface = playerGui:FindFirstChild("MainInterface")
-	if not mainInterface then
-		return nil
-	end
+    local mainInterface = playerGui:FindFirstChild("MainInterface")
+    if not mainInterface then
+        return nil
+    end
 
 
-	local section = mainInterface:GetChildren()[61]
-	if not section then
-		return nil
-	end
+    local interfaceChildren = mainInterface:GetChildren()
+    local section = interfaceChildren[61]
+    if not section then
+        return nil
+    end
 
 
-	local frame = section:GetChildren()[4]
-	if not frame or not frame:FindFirstChild("Frame") then
-		return nil
-	end
+    local sectionChildren = section:GetChildren()
+    local cardFrame = sectionChildren[4]
+    if not cardFrame then
+        return nil
+    end
 
 
-	local scrolling = frame.Frame:FindFirstChild("ScrollingFrame")
-	if not scrolling then
-		return nil
-	end
+    local frame = cardFrame:FindFirstChild("Frame")
+    if not frame then
+        return nil
+    end
 
 
-	return scrolling:FindFirstChild("0.29954987813313594")
+    local scrollingFrame = frame:FindFirstChild("ScrollingFrame")
+    if not scrollingFrame then
+        return nil
+    end
+
+
+    return scrollingFrame:FindFirstChild("0.29954987813313594")
 end
 
 
 local function getEquipButton()
-	local mainInterface = playerGui:FindFirstChild("MainInterface")
-	if not mainInterface then
-		return nil
-	end
+    local mainInterface = playerGui:FindFirstChild("MainInterface")
+    if not mainInterface then
+        return nil
+    end
 
 
-	local section = mainInterface:GetChildren()[61]
-	if not section or not section:FindFirstChild("Frame") then
-		return nil
-	end
+    local interfaceChildren = mainInterface:GetChildren()
+    local section = interfaceChildren[61]
+    if not section then
+        return nil
+    end
 
 
-	local targetFrameChildren = section.Frame:GetChildren()
-	local frameObj = targetFrameChildren[5]
-	if not frameObj or not frameObj:FindFirstChild("Frame") then
-		return nil
-	end
+    local sectionFrame = section:FindFirstChild("Frame")
+    if not sectionFrame then
+        return nil
+    end
 
 
-	local imageButton = frameObj.Frame:FindFirstChild("ImageButton")
-	if not imageButton or not imageButton:FindFirstChild("TextLabel") then
-		return nil
-	end
+    local frameChildren = sectionFrame:GetChildren()
+    local buttonContainer = frameChildren[5]
+    if not buttonContainer then
+        return nil
+    end
 
 
-	local label = imageButton.TextLabel
-	if label.Text == "Equip" then
-		return imageButton
-	end
+    local frame = buttonContainer:FindFirstChild("Frame")
+    if not frame then
+        return nil
+    end
 
 
-	return nil
+    local imageButton = frame:FindFirstChild("ImageButton")
+    if not imageButton then
+        return nil
+    end
+
+
+    local textLabel = imageButton:FindFirstChild("TextLabel")
+    if not textLabel then
+        return nil
+    end
+
+
+    if textLabel.Text ~= "Equip" then
+        return nil
+    end
+
+
+    return imageButton
 end
-
-
--- ===== AutoEquipLogic.lua =====
--- TRY TO EQUIP ABYSSAL HUNTER
 
 
 local function tryEquipAbyssalHunter()
-	local card = getAbyssalHunterCard()
-	if not card then
-		return false
-	end
+    local abyssalHunterCard = getAbyssalHunterCard()
+    if not abyssalHunterCard then
+        return false
+    end
 
 
-	clickGuiObject(card)
-	task.wait(0.2)
+    clickGuiObject(abyssalHunterCard)
+    task.wait(0.25)
 
 
-	local equipBtn = getEquipButton()
-	if not equipBtn then
-		return false
-	end
+    local equipButton = getEquipButton()
+    if not equipButton then
+        return false
+    end
 
 
-	clickGuiObject(equipBtn)
-	return true
+    clickGuiObject(equipButton)
+    return true
 end
 
 
--- ===== AutoEquipScanner.lua =====
--- PERIODIC CHECK (USES autoEquipEnabled STATE)
+task.spawn(function()
+    local mainInterface = playerGui:WaitForChild("MainInterface", 10)
+    if not mainInterface then
+        return
+    end
 
 
-local autoEquipToken = 0
+    while screenGui.Parent do
+        if autoEquipEnabled then
+            tryEquipAbyssalHunter()
+        end
 
 
-local function startAutoEquip()
-	autoEquipEnabled = true
-	autoEquipToken += 1
-	local token = autoEquipToken
-
-
-	task.spawn(function()
-		local mainInterface = playerGui:WaitForChild("MainInterface", 10)
-		if not mainInterface then
-			return
-		end
-
-
-		while autoEquipEnabled and token == autoEquipToken do
-			task.wait(CHECK_INTERVAL)
-
-
-			if autoEquipEnabled and token == autoEquipToken then
-				tryEquipAbyssalHunter()
-			end
-		end
-	end)
-end
-
-
-local function stopAutoEquip()
-	autoEquipEnabled = false
-	autoEquipToken += 1
-end
-
--- Wire the autoEquipButton click (same pattern as viewPathButton / autoJumpButton):
-autoEquipButton.MouseButton1Click:Connect(function()
-	autoEquipEnabled = not autoEquipEnabled
-
-
-	if autoEquipEnabled then
-		startAutoEquip()
-	else
-		stopAutoEquip()
-	end
-
-
-	updateMenuTexts()
-end)
-
-
--- Optional: immediately try equip when turning on
-autoEquipButton.MouseButton1Click:Connect(function()
-	if autoEquipEnabled then
-		tryEquipAbyssalHunter()
-	end
+        task.wait(AUTO_EQUIP_CHECK_INTERVAL)
+    end
 end)
