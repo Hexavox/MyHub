@@ -20,6 +20,7 @@ ORDER = [
     "InteractionHelpers.lua",
     "WatermelonPromptHandler.lua",
     "AutoEquip.lua",
+    "AutoDevice.lua",
     "PathfindingEngine.lua",
     "AutomationSequences.lua",
     "ControllerExecution.lua",
