@@ -47,8 +47,8 @@ statusLabel.Parent = frame
 
 local attemptsLabel = Instance.new("TextLabel")
 attemptsLabel.Name = "AttemptsLabel"
-attemptsLabel.Size = UDim2.new(1, -24, 0, 18)
-attemptsLabel.Position = UDim2.fromOffset(12, 50)
+attemptsLabel.Size = UDim2.new(1, -18, 0, 18)
+attemptsLabel.Position = UDim2.fromOffset(12, 40)
 attemptsLabel.BackgroundTransparency = 1
 attemptsLabel.Text = "⚠ 0 Attempts"
 attemptsLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -78,11 +78,11 @@ end
 
 local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
-local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 162)
+local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 107)
 
 local dropdownArrow = Instance.new("TextLabel")
 dropdownArrow.Name = "DropdownArrow"
-dropdownArrow.Size = UDim2.fromOffset(20, 20)
+dropdownArrow.Size = UDim2.fromOffset(30, 30)
 dropdownArrow.Position = UDim2.new(1, -24, 0.5, -10)
 dropdownArrow.BackgroundTransparency = 1
 dropdownArrow.Text = "▼"

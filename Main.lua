@@ -166,8 +166,8 @@ statusLabel.Parent = frame
 
 local attemptsLabel = Instance.new("TextLabel")
 attemptsLabel.Name = "AttemptsLabel"
-attemptsLabel.Size = UDim2.new(1, -24, 0, 18)
-attemptsLabel.Position = UDim2.fromOffset(12, 50)
+attemptsLabel.Size = UDim2.new(1, -18, 0, 18)
+attemptsLabel.Position = UDim2.fromOffset(12, 40)
 attemptsLabel.BackgroundTransparency = 1
 attemptsLabel.Text = "⚠ 0 Attempts"
 attemptsLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
@@ -197,11 +197,11 @@ end
 
 local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 58)
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 104)
-local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 162)
+local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 107)
 
 local dropdownArrow = Instance.new("TextLabel")
 dropdownArrow.Name = "DropdownArrow"
-dropdownArrow.Size = UDim2.fromOffset(20, 20)
+dropdownArrow.Size = UDim2.fromOffset(30, 30)
 dropdownArrow.Position = UDim2.new(1, -24, 0.5, -10)
 dropdownArrow.BackgroundTransparency = 1
 dropdownArrow.Text = "▼"
@@ -847,10 +847,9 @@ end
 -- AUTO EQUIP ABYSSAL HUNTER
 
 
-local AUTO_EQUIP_AURA_NAME = "Abyssal Hunter"
-local AUTO_EQUIP_SCAN_INTERVAL = 300
+local AUTO_EQUIP_SCAN_INTERVAL = 1000
 local AUTO_EQUIP_RETRY_INTERVAL = 15
-local AUTO_EQUIP_MENU_WAIT = 2
+local AUTO_EQUIP_AURA_NAME = "Abyssal Hunter"
 
 
 local cachedAbyssalHunterButton = nil
@@ -886,30 +885,6 @@ local function clickGuiObject(object)
 end
 
 
-local function getAuraPanel()
-    local mainInterface = playerGui:FindFirstChild("MainInterface")
-    if not mainInterface then
-        return nil
-    end
-
-
-    -- Kept from the path you provided.
-    local auraPanel = mainInterface:GetChildren()[61]
-    if not auraPanel or not auraPanel:IsA("GuiObject") then
-        return nil
-    end
-
-
-    return auraPanel
-end
-
-
-local function isAuraMenuOpen()
-    local auraPanel = getAuraPanel()
-    return auraPanel and auraPanel.Visible or false
-end
-
-
 local function findAurasSideButton()
     local mainInterface = playerGui:FindFirstChild("MainInterface")
     if not mainInterface then
@@ -923,9 +898,9 @@ local function findAurasSideButton()
     end
 
 
-    for _, object in ipairs(sideButtons:GetChildren()) do
-        if object:IsA("TextButton") or object:IsA("ImageButton") then
-            local usageLabel = object:FindFirstChild("Usage", true)
+    for _, button in ipairs(sideButtons:GetChildren()) do
+        if button:IsA("TextButton") or button:IsA("ImageButton") then
+            local usageLabel = button:FindFirstChild("Usage", true)
 
 
             if usageLabel
@@ -933,7 +908,7 @@ local function findAurasSideButton()
                 and usageLabel.Text == "Auras" then
 
 
-                return object
+                return button
             end
         end
     end
@@ -943,27 +918,58 @@ local function findAurasSideButton()
 end
 
 
+local function getAuraPanel()
+    local mainInterface = playerGui:FindFirstChild("MainInterface")
+    if not mainInterface then
+        return nil
+    end
+
+
+    local interfaceChildren = mainInterface:GetChildren()
+    local auraSection = interfaceChildren[61]
+    if not auraSection then
+        return nil
+    end
+
+
+    return auraSection
+end
+
+
+local function isAuraMenuOpen()
+    local auraPanel = getAuraPanel()
+    if not auraPanel or not auraPanel:IsA("GuiObject") then
+        return false
+    end
+
+
+    return auraPanel.Visible
+end
+
+
 local function openAurasMenu()
+    -- Do not click the sidebar button if Auras is already open.
+    -- Clicking it again can toggle the panel closed.
     if isAuraMenuOpen() then
-        return true, false
+        return true
     end
 
 
     local aurasSideButton = findAurasSideButton()
     if not aurasSideButton then
-        return false, false
+        return false
     end
 
 
     if not clickGuiObject(aurasSideButton) then
-        return false, false
+        return false
     end
 
 
     local startedAt = os.clock()
-    while os.clock() - startedAt < AUTO_EQUIP_MENU_WAIT do
+    while os.clock() - startedAt < 2 do
         if isAuraMenuOpen() then
-            return true, true
+            return true
         end
 
 
@@ -971,23 +977,7 @@ local function openAurasMenu()
     end
 
 
-    return false, false
-end
-
-
-local function closeAurasMenu()
-    if not isAuraMenuOpen() then
-        return
-    end
-
-
-    local aurasSideButton = findAurasSideButton()
-    if not aurasSideButton then
-        return
-    end
-
-
-    clickGuiObject(aurasSideButton)
+    return false
 end
 
 
@@ -998,7 +988,8 @@ local function getAuraScrollingFrame()
     end
 
 
-    local auraListContainer = auraPanel:GetChildren()[4]
+    local auraPanelChildren = auraPanel:GetChildren()
+    local auraListContainer = auraPanelChildren[4]
     if not auraListContainer then
         return nil
     end
@@ -1014,6 +1005,23 @@ local function getAuraScrollingFrame()
 end
 
 
+local function getAuraNameFromButton(button)
+    if not button or not button:IsA("GuiObject") then
+        return nil
+    end
+
+
+    for _, object in ipairs(button:GetDescendants()) do
+        if object:IsA("TextLabel") and object.Text == AUTO_EQUIP_AURA_NAME then
+            return object.Text
+        end
+    end
+
+
+    return nil
+end
+
+
 local function scanForAbyssalHunterButton()
     local scrollingFrame = getAuraScrollingFrame()
     if not scrollingFrame then
@@ -1023,19 +1031,12 @@ local function scanForAbyssalHunterButton()
 
 
     local seenAuraNames = {}
+    local abyssalHunterButton = nil
 
 
     for _, button in ipairs(scrollingFrame:GetChildren()) do
         if button:IsA("TextButton") or button:IsA("ImageButton") then
-            local auraName = nil
-
-
-            for _, object in ipairs(button:GetDescendants()) do
-                if object:IsA("TextLabel") and object.Text == AUTO_EQUIP_AURA_NAME then
-                    auraName = object.Text
-                    break
-                end
-            end
+            local auraName = getAuraNameFromButton(button)
 
 
             if auraName and not seenAuraNames[auraName] then
@@ -1043,18 +1044,19 @@ local function scanForAbyssalHunterButton()
 
 
                 if auraName == AUTO_EQUIP_AURA_NAME then
-                    cachedAbyssalHunterButton = button
-                    lastAuraScan = os.clock()
-                    return button
+                    abyssalHunterButton = button
+                    break
                 end
             end
         end
     end
 
 
-    cachedAbyssalHunterButton = nil
+    cachedAbyssalHunterButton = abyssalHunterButton
     lastAuraScan = os.clock()
-    return nil
+
+
+    return cachedAbyssalHunterButton
 end
 
 
@@ -1071,7 +1073,8 @@ local function getEquipButton()
     end
 
 
-    local equipContainer = detailsFrame:GetChildren()[5]
+    local detailsChildren = detailsFrame:GetChildren()
+    local equipContainer = detailsChildren[5]
     if not equipContainer then
         return nil
     end
@@ -1099,50 +1102,31 @@ local function getEquipButton()
 end
 
 
-local function shouldRescanAuraList()
-    if not cachedAbyssalHunterButton then
-        return true
-    end
-
-
-    if not cachedAbyssalHunterButton.Parent then
-        return true
-    end
-
-
-    if not cachedAbyssalHunterButton:IsDescendantOf(playerGui) then
-        return true
-    end
-
-
-    return os.clock() - lastAuraScan >= AUTO_EQUIP_SCAN_INTERVAL
-end
-
-
 local function tryEquipAbyssalHunter()
     if not autoEquipEnabled then
         return false
     end
 
 
-    local menuWasOpened, openedByScript = openAurasMenu()
-    if not menuWasOpened then
+    if not openAurasMenu() then
         return false
     end
 
 
     local abyssalHunterButton = cachedAbyssalHunterButton
-    if shouldRescanAuraList() then
+
+
+    if not abyssalHunterButton
+        or not abyssalHunterButton.Parent
+        or not abyssalHunterButton:IsDescendantOf(playerGui)
+        or os.clock() - lastAuraScan >= AUTO_EQUIP_SCAN_INTERVAL then
+
+
         abyssalHunterButton = scanForAbyssalHunterButton()
     end
 
 
     if not abyssalHunterButton then
-        if openedByScript then
-            closeAurasMenu()
-        end
-
-
         return false
     end
 
@@ -1152,19 +1136,14 @@ local function tryEquipAbyssalHunter()
 
 
     local equipButton = getEquipButton()
-    if equipButton then
-        clickGuiObject(equipButton)
-        task.wait(0.15)
+    if not equipButton then
+        -- The selected aura has no button labeled "Equip".
+        -- Usually that means it is already equipped.
+        return true
     end
 
 
-    -- Only close the Aura panel if it was closed before the auto-equip ran.
-    -- If you had it open yourself, leave it open.
-    if openedByScript then
-        closeAurasMenu()
-    end
-
-
+    clickGuiObject(equipButton)
     return true
 end
 
