@@ -2,7 +2,7 @@
 
 local contextMenu = Instance.new("Frame")
 contextMenu.Name = "PathContextMenu"
-contextMenu.Size = UDim2.fromOffset(200, 84)
+contextMenu.Size = UDim2.fromOffset(200, 126)
 contextMenu.BackgroundColor3 = Color3.fromRGB(12, 14, 20)
 contextMenu.BackgroundTransparency = 0.15
 contextMenu.BorderSizePixel = 0
