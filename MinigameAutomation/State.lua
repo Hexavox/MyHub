@@ -5,6 +5,7 @@ local pathfindingEnabled = false
 local viewPathEnabled = false
 local autoJumpEnabled = true
 local autoEquipEnabled = false
+local autoDeviceEnabled = false
 
 local trackedWatermelons = {}
 

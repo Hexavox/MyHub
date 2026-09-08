@@ -61,22 +61,6 @@ autoEquipButton.ZIndex = 21
 autoEquipButton.Parent = contextMenu
 addCorner(autoEquipButton, 8)
 
-local autoDeviceButton = Instance.new("TextButton")
-autoDeviceButton.Name = "AutoDeviceButton"
-autoDeviceButton.Size = UDim2.new(1, -10, 0, 34)
-autoDeviceButton.Position = UDim2.fromOffset(5, 122)
-autoDeviceButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-autoDeviceButton.BackgroundTransparency = 0.94
-autoDeviceButton.BorderSizePixel = 0
-autoDeviceButton.TextColor3 = Color3.fromRGB(230, 235, 245)
-autoDeviceButton.Font = Enum.Font.GothamMedium
-autoDeviceButton.TextSize = 11
-autoDeviceButton.TextXAlignment = Enum.TextXAlignment.Left
-autoDeviceButton.AutoButtonColor = false
-autoDeviceButton.ZIndex = 21
-autoDeviceButton.Parent = contextMenu
-addCorner(autoDeviceButton, 8)
-
 local function updateMenuTexts()
     viewPathButton.Text = viewPathEnabled
         and "   ✓   View Pathfind Path"
@@ -89,10 +73,5 @@ local function updateMenuTexts()
     autoEquipButton.Text = autoEquipEnabled
         and "   ✓   Auto-Equip Aura"
         or "   □   Auto-Equip Aura"
-
-    autoDeviceButton.Text = autoDeviceEnabled
-        and "   ✓   Auto-Device"
-        or "   □   Auto-Device"
-end
 
 updateMenuTexts()
