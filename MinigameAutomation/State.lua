@@ -1,17 +1,12 @@
--- State.lua
-return {
-	boxesEnabled = true,
-	pathfindingEnabled = false,
-	viewPathEnabled = false,
-	autoJumpEnabled = true,
+-- STATE
 
-	trackedWatermelons = {},
+local boxesEnabled = true
+local pathfindingEnabled = false
+local viewPathEnabled = false
+local autoJumpEnabled = true
 
-	routineToken = 0,
-	activeRoutine = false,
-	consecutivePathFailures = 0,
+local trackedWatermelons = {}
 
-	gui = nil,
-	visualFolder = nil,
-	pathVisualFolder = nil,
-}
+local routineToken = 0
+local activeRoutine = false
+local consecutivePathFailures = 0
