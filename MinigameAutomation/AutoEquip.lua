@@ -1,25 +1,12 @@
--- AutoEquip.lua
+-- ===== AutoEquip.lua =====
 -- AUTO EQUIP ABYSSAL HUNTER
 
 
 local CHECK_INTERVAL = 10
 
 
--- ===== Services.lua =====
--- SERVICES
-
-
-local Players = game:GetService("Players")
-local GuiService = game:GetService("GuiService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
-
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui", 10)
-
-
--- ===== EquipHelpers.lua =====
--- CLICK HELPERS (SAME STYLE AS WATERMELON BOT)
+-- ===== AutoEquipHelpers.lua =====
+-- CLICK HELPERS
 
 
 local function clickGuiObject(obj)
@@ -142,20 +129,61 @@ end
 
 
 -- ===== AutoEquipScanner.lua =====
--- PERIODIC CHECK (TICKET SCANNER STYLE)
+-- PERIODIC CHECK (USES autoEquipEnabled STATE)
 
 
-task.spawn(function()
-	local mainInterface = playerGui:WaitForChild("MainInterface", 10)
-	if not mainInterface then
-		return
+local autoEquipToken = 0
+
+
+local function startAutoEquip()
+	autoEquipEnabled = true
+	autoEquipToken += 1
+	local token = autoEquipToken
+
+
+	task.spawn(function()
+		local mainInterface = playerGui:WaitForChild("MainInterface", 10)
+		if not mainInterface then
+			return
+		end
+
+
+		while autoEquipEnabled and token == autoEquipToken do
+			task.wait(CHECK_INTERVAL)
+
+
+			if autoEquipEnabled and token == autoEquipToken then
+				tryEquipAbyssalHunter()
+			end
+		end
+	end)
+end
+
+
+local function stopAutoEquip()
+	autoEquipEnabled = false
+	autoEquipToken += 1
+end
+
+-- Wire the autoEquipButton click (same pattern as viewPathButton / autoJumpButton):
+autoEquipButton.MouseButton1Click:Connect(function()
+	autoEquipEnabled = not autoEquipEnabled
+
+
+	if autoEquipEnabled then
+		startAutoEquip()
+	else
+		stopAutoEquip()
 	end
 
 
-	while true do
-		task.wait(CHECK_INTERVAL)
+	updateMenuTexts()
+end)
 
 
+-- Optional: immediately try equip when turning on
+autoEquipButton.MouseButton1Click:Connect(function()
+	if autoEquipEnabled then
 		tryEquipAbyssalHunter()
 	end
 end)
