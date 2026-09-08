@@ -2,7 +2,13 @@
 -- AUTO EQUIP ABYSSAL HUNTER
 
 
-local AUTO_EQUIP_CHECK_INTERVAL = 10
+local AUTO_EQUIP_SCAN_INTERVAL = 300
+local AUTO_EQUIP_RETRY_INTERVAL = 5
+local AUTO_EQUIP_AURA_NAME = "Abyssal Hunter"
+
+
+local cachedAbyssalHunterButton = nil
+local lastAuraScan = 0
 
 
 local function clickGuiObject(object)
@@ -34,7 +40,51 @@ local function clickGuiObject(object)
 end
 
 
-local function getAbyssalHunterCard()
+local function findAurasSideButton()
+    local mainInterface = playerGui:FindFirstChild("MainInterface")
+    if not mainInterface then
+        return nil
+    end
+
+
+    local sideButtons = mainInterface:FindFirstChild("SideButtons")
+    if not sideButtons then
+        return nil
+    end
+
+
+    for _, button in ipairs(sideButtons:GetChildren()) do
+        if button:IsA("TextButton") or button:IsA("ImageButton") then
+            local usageLabel = button:FindFirstChild("Usage", true)
+
+
+            if usageLabel
+                and usageLabel:IsA("TextLabel")
+                and usageLabel.Text == "Auras" then
+
+
+                return button
+            end
+        end
+    end
+
+
+    return nil
+end
+
+
+local function openAurasMenu()
+    local aurasSideButton = findAurasSideButton()
+    if not aurasSideButton then
+        return false
+    end
+
+
+    return clickGuiObject(aurasSideButton)
+end
+
+
+local function getAuraScrollingFrame()
     local mainInterface = playerGui:FindFirstChild("MainInterface")
     if not mainInterface then
         return nil
@@ -42,32 +92,81 @@ local function getAbyssalHunterCard()
 
 
     local interfaceChildren = mainInterface:GetChildren()
-    local section = interfaceChildren[61]
-    if not section then
+    local auraSection = interfaceChildren[61]
+    if not auraSection then
         return nil
     end
 
 
-    local sectionChildren = section:GetChildren()
-    local cardFrame = sectionChildren[4]
-    if not cardFrame then
+    local auraSectionChildren = auraSection:GetChildren()
+    local auraListContainer = auraSectionChildren[4]
+    if not auraListContainer then
         return nil
     end
 
 
-    local frame = cardFrame:FindFirstChild("Frame")
+    local frame = auraListContainer:FindFirstChild("Frame")
     if not frame then
         return nil
     end
 
 
-    local scrollingFrame = frame:FindFirstChild("ScrollingFrame")
-    if not scrollingFrame then
+    return frame:FindFirstChild("ScrollingFrame")
+end
+
+
+local function getAuraNameFromButton(button)
+    if not button or not button:IsA("GuiObject") then
         return nil
     end
 
 
-    return scrollingFrame:FindFirstChild("0.29954987813313594")
+    for _, object in ipairs(button:GetDescendants()) do
+        if object:IsA("TextLabel") and object.Text == AUTO_EQUIP_AURA_NAME then
+            return object.Text
+        end
+    end
+
+
+    return nil
+end
+
+
+local function scanForAbyssalHunterButton()
+    local scrollingFrame = getAuraScrollingFrame()
+    if not scrollingFrame then
+        cachedAbyssalHunterButton = nil
+        return nil
+    end
+
+
+    local seenAuraNames = {}
+    local abyssalHunterButton = nil
+
+
+    for _, button in ipairs(scrollingFrame:GetChildren()) do
+        if button:IsA("TextButton") or button:IsA("ImageButton") then
+            local auraName = getAuraNameFromButton(button)
+
+
+            if auraName and not seenAuraNames[auraName] then
+                seenAuraNames[auraName] = true
+
+
+                if auraName == AUTO_EQUIP_AURA_NAME then
+                    abyssalHunterButton = button
+                    break
+                end
+            end
+        end
+    end
+
+
+    cachedAbyssalHunterButton = abyssalHunterButton
+    lastAuraScan = os.clock()
+
+
+    return cachedAbyssalHunterButton
 end
 
 
@@ -79,26 +178,26 @@ local function getEquipButton()
 
 
     local interfaceChildren = mainInterface:GetChildren()
-    local section = interfaceChildren[61]
-    if not section then
+    local auraSection = interfaceChildren[61]
+    if not auraSection then
         return nil
     end
 
 
-    local sectionFrame = section:FindFirstChild("Frame")
-    if not sectionFrame then
+    local detailsFrame = auraSection:FindFirstChild("Frame")
+    if not detailsFrame then
         return nil
     end
 
 
-    local frameChildren = sectionFrame:GetChildren()
-    local buttonContainer = frameChildren[5]
-    if not buttonContainer then
+    local detailsChildren = detailsFrame:GetChildren()
+    local equipContainer = detailsChildren[5]
+    if not equipContainer then
         return nil
     end
 
 
-    local frame = buttonContainer:FindFirstChild("Frame")
+    local frame = equipContainer:FindFirstChild("Frame")
     if not frame then
         return nil
     end
@@ -111,12 +210,7 @@ local function getEquipButton()
 
 
     local textLabel = imageButton:FindFirstChild("TextLabel")
-    if not textLabel then
-        return nil
-    end
-
-
-    if textLabel.Text ~= "Equip" then
+    if not textLabel or textLabel.Text ~= "Equip" then
         return nil
     end
 
@@ -126,19 +220,41 @@ end
 
 
 local function tryEquipAbyssalHunter()
-    local abyssalHunterCard = getAbyssalHunterCard()
-    if not abyssalHunterCard then
+    if not autoEquipEnabled then
         return false
     end
 
 
-    clickGuiObject(abyssalHunterCard)
+    openAurasMenu()
+    task.wait(0.35)
+
+
+    local abyssalHunterButton = cachedAbyssalHunterButton
+
+
+    if not abyssalHunterButton
+        or not abyssalHunterButton.Parent
+        or not abyssalHunterButton:IsDescendantOf(playerGui)
+        or os.clock() - lastAuraScan >= AUTO_EQUIP_SCAN_INTERVAL then
+
+
+        abyssalHunterButton = scanForAbyssalHunterButton()
+    end
+
+
+    if not abyssalHunterButton then
+        return false
+    end
+
+
+    clickGuiObject(abyssalHunterButton)
     task.wait(0.25)
 
 
     local equipButton = getEquipButton()
     if not equipButton then
-        return false
+        -- No "Equip" button usually means Abyssal Hunter is already equipped.
+        return true
     end
 
 
@@ -148,18 +264,12 @@ end
 
 
 task.spawn(function()
-    local mainInterface = playerGui:WaitForChild("MainInterface", 10)
-    if not mainInterface then
-        return
-    end
-
-
     while screenGui.Parent do
         if autoEquipEnabled then
             tryEquipAbyssalHunter()
         end
 
 
-        task.wait(AUTO_EQUIP_CHECK_INTERVAL)
+        task.wait(AUTO_EQUIP_RETRY_INTERVAL)
     end
 end)
