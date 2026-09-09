@@ -168,7 +168,7 @@ local gridLayout = Instance.new("UIListLayout")
 gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 gridLayout.Padding = UDim.new(0, 5)
 gridLayout.Parent = buttonGridFrame
--- ===== BIOME LOGS & GUI SYSTEM (PART 4 OF 4 - WITH TEXT OUTLINES) =====
+-- ===== BIOME LOGS & GUI SYSTEM (PART 4 OF 4) =====
 
 -- Tally UI Core Button Node Generator
 local uiButtons = {}
@@ -189,14 +189,6 @@ for idx, config in ipairs(BIOME_CONFIG) do
     biomeBtn.Parent = buttonGridFrame
     addCorner(biomeBtn, 8)
     addGlassStroke(biomeBtn, 0.85, 1)
-
-    -- Dynamic Anti-Glare Text Outline for the button contents
-    local textStroke = Instance.new("UIStroke")
-    textStroke.Color = Color3.fromRGB(10, 12, 16)      -- Dark outline layer
-    textStroke.Thickness = 1.2                         -- Thin shell so it doesn't pixelate fonts
-    textStroke.Transparency = 0.2                      -- Slightly transparent blend
-    textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual -- Binds outline directly to text characters
-    textStroke.Parent = biomeBtn
 
     -- Toggle Engine Handler Hook
     biomeBtn.MouseButton1Click:Connect(function()
@@ -253,4 +245,4 @@ TextChatService.OnIncomingMessage = function(message)
         end
     end
 end
-print("Biome Tracker fully initiated with readable text outlines!")
+print("Biome Tracker fully initiated!")
