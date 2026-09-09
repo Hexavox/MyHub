@@ -23,7 +23,9 @@ local BIOME_CONFIG = {
     { ID = "Sandstorm",   Color = Color3.fromRGB(240, 200, 110),  Text = "Sandstorm" },
     { ID = "Rainy",       Color = Color3.fromRGB(140, 170, 190),  Text = "Rainy" },
     { ID = "Snowy",       Color = Color3.fromRGB(200, 235, 255),  Text = "Snowy" },
-    { ID = "Windy",       Color = Color3.fromRGB(170, 255, 230),  Text = "Windy" }
+    { ID = "Windy",       Color = Color3.fromRGB(170, 255, 230),  Text = "Windy" },
+    { ID = "Blazing Sun", Color = Color3.fromRGB(236, 230, 46),   Text = "Blazing Sun" },
+    { ID = "Incinerator", Color = Color3.fromRGB(206, 128, 0),    Text = "Incinerator" }
 }
 
 -- Operational State Data Storage
@@ -168,7 +170,7 @@ local gridLayout = Instance.new("UIListLayout")
 gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 gridLayout.Padding = UDim.new(0, 5)
 gridLayout.Parent = buttonGridFrame
--- ===== BIOME LOGS & GUI SYSTEM (PART 4 OF 4) =====
+-- ===== BIOME LOGS & GUI SYSTEM (PART 4 OF 4 - WITH TEXT OUTLINES) =====
 
 -- Tally UI Core Button Node Generator
 local uiButtons = {}
@@ -189,6 +191,14 @@ for idx, config in ipairs(BIOME_CONFIG) do
     biomeBtn.Parent = buttonGridFrame
     addCorner(biomeBtn, 8)
     addGlassStroke(biomeBtn, 0.85, 1)
+
+    -- Dynamic Anti-Glare Text Outline for the button contents
+    local textStroke = Instance.new("UIStroke")
+    textStroke.Color = Color3.fromRGB(10, 12, 16)      -- Dark outline layer
+    textStroke.Thickness = 1.2                         -- Thin shell so it doesn't pixelate fonts
+    textStroke.Transparency = 0.2                      -- Slightly transparent blend
+    textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual -- Binds outline directly to text characters
+    textStroke.Parent = biomeBtn
 
     -- Toggle Engine Handler Hook
     biomeBtn.MouseButton1Click:Connect(function()
@@ -245,4 +255,4 @@ TextChatService.OnIncomingMessage = function(message)
         end
     end
 end
-print("Biome Tracker fully initiated!")
+print("Biome Tracker fully initiated with readable text outlines!")
