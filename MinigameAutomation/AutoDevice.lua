@@ -3,8 +3,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ByteNetEvent = ReplicatedStorage:WaitForChild("ByteNetReliable")
 
-local BIOME_INTERVAL = 30 * 60  -- 30 minutes
-local STRANGE_INTERVAL = 20 * 60  -- 20 minutes
+local BIOME_INTERVAL = 5 * 60  -- 30 minutes
+local STRANGE_INTERVAL = 5 * 60  -- 20 minutes
 
 -- Generic function to build and send the requested byte stream
 local function fireDevicePacket(bytes)
