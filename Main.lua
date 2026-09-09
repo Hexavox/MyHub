@@ -872,7 +872,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ByteNetEvent = ReplicatedStorage:WaitForChild("ByteNetReliable")
 
-local AUTO_EQUIP_RETRY_INTERVAL = 30
+local AUTO_EQUIP_RETRY_INTERVAL = 15
 
 -- Packs and dispatches a raw byte array directly to the engine
 local function fireEquipPacket(bytes)
