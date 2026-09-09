@@ -157,13 +157,6 @@ currentBiomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 currentBiomeLabel.LayoutOrder = 2
 currentBiomeLabel.Parent = frame
 
-local biomeStroke = Instance.new("UIStroke")
-biomeStroke.Color = Color3.fromRGB(10, 12, 16)      -- Deep dark tone to provide a strong drop shadow
-biomeStroke.Thickness = 1.5                         -- Optimal thickness for text under 18pt
-biomeStroke.Transparency = 0.2                      -- Subtle blend so it doesn't look harsh
-biomeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual -- Ensures the outline binds to text geometry
-biomeStroke.Parent = currentBiomeLabel
-
 -- Container Grid Framework
 local buttonGridFrame = Instance.new("Frame")
 buttonGridFrame.Name = "ButtonGrid"
@@ -177,7 +170,7 @@ local gridLayout = Instance.new("UIListLayout")
 gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 gridLayout.Padding = UDim.new(0, 5)
 gridLayout.Parent = buttonGridFrame
--- ===== BIOME LOGS & GUI SYSTEM (PART 4 OF 4) =====
+-- ===== BIOME LOGS & GUI SYSTEM (PART 4 OF 4 - WITH TEXT OUTLINES) =====
 
 -- Tally UI Core Button Node Generator
 local uiButtons = {}
@@ -198,6 +191,14 @@ for idx, config in ipairs(BIOME_CONFIG) do
     biomeBtn.Parent = buttonGridFrame
     addCorner(biomeBtn, 8)
     addGlassStroke(biomeBtn, 0.85, 1)
+
+    -- Dynamic Anti-Glare Text Outline for the button contents
+    local textStroke = Instance.new("UIStroke")
+    textStroke.Color = Color3.fromRGB(10, 12, 16)      -- Dark outline layer
+    textStroke.Thickness = 1.2                         -- Thin shell so it doesn't pixelate fonts
+    textStroke.Transparency = 0.2                      -- Slightly transparent blend
+    textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual -- Binds outline directly to text characters
+    textStroke.Parent = biomeBtn
 
     -- Toggle Engine Handler Hook
     biomeBtn.MouseButton1Click:Connect(function()
@@ -254,4 +255,4 @@ TextChatService.OnIncomingMessage = function(message)
         end
     end
 end
-print("Biome Tracker fully initiated!")
+print("Biome Tracker fully initiated with readable text outlines!")
