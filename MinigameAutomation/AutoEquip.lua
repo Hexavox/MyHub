@@ -313,15 +313,3 @@ task.spawn(function()
         task.wait(AUTO_EQUIP_RETRY_INTERVAL)
     end
 end)
-take all of that, and make it like way shorter using this event: 
-Event:FireServer(
-    (function(bytes) --[[Type: buffer]]
-        local b = buffer.create(#bytes)
-        for i = 1, #bytes do
-            buffer.writeu8(b, i - 1, bytes[i])
-        end
-        return b
-    end)({ 135, 24, 0, 0 }),
-    nil
-)
-like thats all u need to be able to auto equip the aura, just make it like check for your aura or somthign i dont really know :Sob:

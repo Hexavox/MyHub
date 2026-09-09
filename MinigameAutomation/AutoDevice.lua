@@ -1,209 +1,31 @@
 -- ===== AUTO-DEVICE LOGIC =====
 
-local BIOME_RANDOMIZER_NAME = "Item\010Biome Randomizer"
-local STRANGE_CONTROLLER_NAME = "Item\010Strange Controller"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ByteNetEvent = ReplicatedStorage:WaitForChild("ByteNetReliable")
 
 local BIOME_INTERVAL = 30 * 60  -- 30 minutes
 local STRANGE_INTERVAL = 20 * 60  -- 20 minutes
 
-local function clickGuiObject(object)
-	if not object or not object:IsA("GuiObject") then
-		return false
+local autoDeviceEnabled = true -- Global macro state variable from your script
+
+-- Raw ByteNet byte definitions
+local STRANGE_BYTES = { 34, 1, 0, 0, 0, 18, 0, 83, 116, 114, 97, 110, 103, 101, 32, 67, 111, 110, 116, 114, 111, 108, 108, 101, 114 }
+local BIOME_BYTES = { 34, 1, 0, 0, 0, 16, 0, 66, 105, 111, 109, 101, 32, 82, 97, 110, 100, 111, 109, 105, 122, 101, 114 }
+
+-- Universal encoder to prepare memory arrays for network deployment
+local function firePacket(byteArray)
+	local packetBuffer = buffer.create(#byteArray)
+	for i = 1, #byteArray do
+		buffer.writeu8(packetBuffer, i - 1, byteArray[i])
 	end
-
-	if not object.Visible then
-		return false
-	end
-
-	local position = object.AbsolutePosition
-	local size = object.AbsoluteSize
-	local inset = GuiService:GetGuiInset()
-
-	local clickX = position.X + (size.X / 2) + inset.X
-	local clickY = position.Y + (size.Y / 2) + inset.Y
-
-	VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 0)
-	task.wait(0.05)
-	VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 0)
-
-	return true
+	ByteNetEvent:FireServer(packetBuffer, nil)
 end
 
-local function getMainInterface()
-	return playerGui:FindFirstChild("MainInterface")
-end
-
-local function findInventorySideButton()
-	local mainInterface = getMainInterface()
-	if not mainInterface then
-		return nil
-	end
-
-	local sideButtons = mainInterface:FindFirstChild("SideButtons")
-	if not sideButtons then
-		return nil
-	end
-
-	for _, button in ipairs(sideButtons:GetChildren()) do
-		if button:IsA("TextButton") or button:IsA("ImageButton") then
-			local usageLabel = button:FindFirstChild("Usage", true)
-			if usageLabel
-				and usageLabel:IsA("TextLabel")
-				and usageLabel.Text == "Inventory" then
-				return button
-			end
-		end
-	end
-
-	return nil
-end
-
-local function openInventoryMenu()
-	local invButton = findInventorySideButton()
-	if not invButton then
-		return false
-	end
-
-	if not clickGuiObject(invButton) then
-		return false
-	end
-
-	task.wait(0.2)
-	return true
-end
-
-local function getItemsTabButton()
-	local mainInterface = getMainInterface()
-	if not mainInterface then
-		return nil
-	end
-
-	local inventory = mainInterface:FindFirstChild("Inventory")
-	if not inventory then
-		return nil
-	end
-
-	local items = inventory:FindFirstChild("Items")
-	if not items then
-		return nil
-	end
-
-	return items:FindFirstChild("ItemsTab")
-end
-
-local function openItemsTab()
-	local itemsTab = getItemsTabButton()
-	if not itemsTab then
-		return false
-	end
-
-	if not clickGuiObject(itemsTab) then
-		return false
-	end
-
-	task.wait(0.2)
-	return true
-end
-
-local function getItemButton(itemName)
-	local mainInterface = getMainInterface()
-	if not mainInterface then
-		return nil
-	end
-
-	local inventory = mainInterface:FindFirstChild("Inventory")
-	if not inventory then
-		return nil
-	end
-
-	local items = inventory:FindFirstChild("Items")
-	if not items then
-		return nil
-	end
-
-	local itemGrid = items:FindFirstChild("ItemGrid")
-	if not itemGrid then
-		return nil
-	end
-
-	local scrollFrame = itemGrid:FindFirstChild("ItemGridScrollingFrame")
-	if not scrollFrame then
-		return nil
-	end
-
-	local itemButtonFrame = scrollFrame:FindFirstChild(itemName)
-	if not itemButtonFrame then
-		return nil
-	end
-
-	return itemButtonFrame:FindFirstChild("Button")
-end
-
-local function getUseButton()
-	local mainInterface = getMainInterface()
-	if not mainInterface then
-		return nil
-	end
-
-	local inventory = mainInterface:FindFirstChild("Inventory")
-	if not inventory then
-		return nil
-	end
-
-	local indexFrame = inventory:FindFirstChild("Index")
-	if not indexFrame then
-		return nil
-	end
-
-	local itemIndex = indexFrame:FindFirstChild("ItemIndex")
-	if not itemIndex then
-		return nil
-	end
-
-	local useHolder = itemIndex:FindFirstChild("UseHolder")
-	if not useHolder then
-		return nil
-	end
-
-	return useHolder:FindFirstChild("UseButton")
-end
-
-local function useItem(itemName)
-	if not openInventoryMenu() then
-		return false
-	end
-
-	if not openItemsTab() then
-		return false
-	end
-
-	local itemButton = getItemButton(itemName)
-	if not itemButton then
-		return false
-	end
-
-	if not clickGuiObject(itemButton) then
-		return false
-	end
-	task.wait(0.15)
-
-	local useButton = getUseButton()
-	if not useButton then
-		return false
-	end
-
-	if not clickGuiObject(useButton) then
-		return false
-	end
-	task.wait(0.15)
-
-	return true
-end
-
+-- Independent, non-blocking execution threads for both devices
 local function runBiomeRandomizerLoop()
 	while true do
 		if autoDeviceEnabled then
-			useItem(BIOME_RANDOMIZER_NAME)
+			firePacket(BIOME_BYTES)
 		end
 		task.wait(BIOME_INTERVAL)
 	end
@@ -212,14 +34,21 @@ end
 local function runStrangeControllerLoop()
 	while true do
 		if autoDeviceEnabled then
-			useItem(STRANGE_CONTROLLER_NAME)
+			firePacket(STRANGE_BYTES)
 		end
 		task.wait(STRANGE_INTERVAL)
 	end
 end
 
--- Start the timers
+-- Fire immediate execution on activation
+task.spawn(function()
+	if autoDeviceEnabled then
+		firePacket(BIOME_BYTES)
+		task.wait(0.5) -- Tiny safety interval to prevent frame congestion
+		firePacket(STRANGE_BYTES)
+	end
+end)
+
+-- Initialize continuous loops
 task.spawn(runBiomeRandomizerLoop)
 task.spawn(runStrangeControllerLoop)
-useItem(BIOME_RANDOMIZER_NAME)
-useItem(STRANGE_CONTROLLER_NAME)
