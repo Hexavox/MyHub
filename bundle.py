@@ -12,6 +12,8 @@ ORDER = [
     "GuiHelpers.lua",
     "GuiSetup.lua",
     "TicketScanner.lua",
+    "Keybinds.lua",
+    "BiomeLogs.lua",
     "GuiDragging.lua",
     "PathContextMenu.lua",
     "UiStateController.lua",
