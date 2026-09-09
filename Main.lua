@@ -471,6 +471,14 @@ titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.LayoutOrder = 1
 titleLabel.Parent = frame
 
+-- Clean Dark Text Outline
+local titleStroke = Instance.new("UIStroke")
+titleStroke.Color = Color3.fromRGB(10, 12, 16)      -- Deep dark tone to provide a strong drop shadow
+titleStroke.Thickness = 1.5                         -- Optimal thickness for text under 18pt
+titleStroke.Transparency = 0.2                      -- Subtle blend so it doesn't look harsh
+titleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual -- Ensures the outline binds to text geometry
+titleStroke.Parent = titleLabel
+
 local currentBiomeLabel = Instance.new("TextLabel")
 currentBiomeLabel.Name = "CurrentBiomeLabel"
 currentBiomeLabel.Size = UDim2.new(1, 0, 0, 16)
