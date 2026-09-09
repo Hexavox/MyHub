@@ -8,6 +8,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local Event = game:GetService("ReplicatedStorage").ByteNetReliable
 
 local Camera = Workspace:FindFirstChildOfClass("Camera")
 
