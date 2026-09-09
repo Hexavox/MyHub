@@ -24,6 +24,8 @@ local BIOME_CONFIG = {
     { ID = "Rainy",       Color = Color3.fromRGB(140, 170, 190),  Text = "Rainy" },
     { ID = "Snowy",       Color = Color3.fromRGB(200, 235, 255),  Text = "Snowy" },
     { ID = "Windy",       Color = Color3.fromRGB(170, 255, 230),  Text = "Windy" }
+    { ID = "Blazing Sun", Color = Color3.fromRGB(236, 230, 46),    Text = "Blazing Sun" },
+    { ID = "Incinerator", Color = Color3.fromRGB(206, 128, 0),     Text = "Incinerator" }
 }
 
 -- Operational State Data Storage
