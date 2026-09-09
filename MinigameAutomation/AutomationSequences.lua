@@ -1,5 +1,13 @@
 -- AUTOMATION SEQUENCES
 
+local plr = game.Players.LocalPlayer
+
+local function resetPlr()
+    if plr.Character then
+        plr.Character:BreakJoints()
+    end
+end
+
 local function getLimeTarget()
     local mapFolder = Workspace:WaitForChild("Map", 5)
     if not mapFolder then return nil, nil, nil end
@@ -18,7 +26,14 @@ local function startWatermelonMinigameSequence(token)
     local targetPrompt, watermelonPart = findWatermelonPrompt()
     local startTime = os.clock()
 
-    while not targetPrompt and (os.clock() - startTime < 10) and shouldContinue(token) do
+    while not targetPrompt and shouldContinue(token) do
+        -- WATERMELON SEARCH TIMEOUT: If looking for more than 3 minutes (180s), give up
+        if os.clock() - startTime > 180 then
+            setStatus("Search timeout! Giving up...", Color3.fromRGB(255, 100, 100))
+            clickGiveUpButton()
+            return
+        end
+
         task.wait(0.5)
         targetPrompt, watermelonPart = findWatermelonPrompt()
     end
@@ -79,12 +94,35 @@ local function executeRoutine(token)
         task.wait(2)
         if not shouldContinue(token) then return end
 
+        -- LIME CONVERSATION STUCK CHECK
+        local conversationStartTime = os.clock()
+
         local minigameBtn = waitForChoiceButton("[ Minigame ]", 8, token)
+        
+        if not minigameBtn then
+            if os.clock() - conversationStartTime > 60 then
+                setStatus("Stuck on Lime! Resetting...", Color3.fromRGB(255, 100, 100))
+                resetPlr()
+                task.wait(5)
+                return
+            end
+        end
+
         if minigameBtn then
             task.wait(0.5)
             clickChoiceButton(minigameBtn)
 
             local ticketBtn = waitForChoiceButton("[ -1 Minigame Ticket ]", 8, token)
+            
+            if not ticketBtn then
+                if os.clock() - conversationStartTime > 60 then
+                    setStatus("Stuck on Ticket! Resetting...", Color3.fromRGB(255, 100, 100))
+                    resetPlr()
+                    task.wait(5)
+                    return
+                end
+            end
+
             if ticketBtn then
                 task.wait(0.5)
                 clickChoiceButton(ticketBtn)
