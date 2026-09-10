@@ -7,6 +7,7 @@ local autoJumpEnabled = true
 local autoEquipEnabled = false
 local autoDeviceEnabled = false
 local autoBoxEnabled = false
+local autoFishEnabled = false
 
 local trackedWatermelons = {}
 

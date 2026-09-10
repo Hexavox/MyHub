@@ -93,6 +93,7 @@ local toggleBoxesButton = makeButton("ToggleBoxesButton", "Bounding Boxes: ON", 
 local togglePathButton = makeButton("TogglePathButton", "Pathfinding: OFF", 5)
 local autoDeviceButton = makeButton("AutoDeviceButton", "Auto-Device: OFF", 6)
 local autoBoxButton = makeButton("AutoBoxButton", "Auto-Box: OFF", 7)
+local autoFishButton = makeButton("AutoFishButton", "Auto-Fish: OFF", 8)
 
 local dropdownArrow = Instance.new("TextLabel")
 dropdownArrow.Name = "DropdownArrow"

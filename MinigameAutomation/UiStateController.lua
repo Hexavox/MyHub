@@ -25,7 +25,13 @@ local function updateBoxToggle()
     autoBoxButton.BackgroundTransparency = autoBoxEnabled and 0.84 or 0.95
 end
 
+local function updateFishToggle()
+    autoFishButton.Text = autoFishEnabled and "Auto-Fish: ON" or "Auto-Fish: OFF"
+    autoFishButton.BackgroundTransparency = autoFishEnabled and 0.84 or 0.95
+end
+
 updateDeviceToggle()
 updateBoxesToggle()
 updatePathToggle()
 updateBoxToggle()
+updateFishToggle()

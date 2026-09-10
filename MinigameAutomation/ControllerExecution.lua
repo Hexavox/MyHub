@@ -65,6 +65,11 @@ autoBoxButton.MouseButton1Click:Connect(function()
     updateBoxToggle()
 end)
 
+autoFishButton.MouseButton1Click:Connect(function()
+    autoFishEnabled = not autoFishEnabled
+    updateFishToggle()
+end)
+
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if contextMenu.Visible then
