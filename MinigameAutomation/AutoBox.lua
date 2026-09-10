@@ -1,4 +1,4 @@
--- ===== CONFIGURATION & TOGGLES (Declared First!) =====
+-- ===== CONFIGURATION & INITIALIZATION =====
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
@@ -7,24 +7,30 @@ local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ByteNetEvent = ReplicatedStorage:WaitForChild("ByteNetReliable")
 
 local CHEST_INTERVAL = 6.5
-local autoBoxEnabled = false -- Declared at the very top so everything below can see it!
+local autoBoxEnabled = false -- Shared toggle variable
 
 -- ===== UI BUTTON SETUP =====
--- Note: Make sure your custom 'makeButton' function is defined somewhere above this line!
+-- (Ensure your custom 'makeButton' function definition exists above this block)
 local autoBoxButton = makeButton("AutoBoxButton", "Auto-Box: OFF", 7)
 
 local function updateBoxToggle()
+    if not autoBoxButton then return end
     autoBoxButton.Text = autoBoxEnabled and "Auto-Box: ON" or "Auto-Box: OFF"
     autoBoxButton.BackgroundTransparency = autoBoxEnabled and 0.84 or 0.95
 end
 
-autoBoxButton.MouseButton1Click:Connect(function()
-    autoBoxEnabled = not autoBoxEnabled -- Fixed name to match your loop variable
-    updateBoxToggle()
-end)
+-- Safely attach event after button creation
+if autoBoxButton then
+    autoBoxButton.MouseButton1Click:Connect(function()
+        autoBoxEnabled = not autoBoxEnabled
+        updateBoxToggle()
+    end)
+else
+    warn("[AutoBox Error]: The 'makeButton' function returned nil. Check your button framework.")
+end
 
 
--- ===== UTILITY FUNCTIONS =====
+-- ===== PACKET & UI UTILITIES =====
 -- Generic function to build and send the requested byte stream
 local function fireChestPacket(bytes)
     local packetBuffer = buffer.create(#bytes)
@@ -46,6 +52,7 @@ local function getBoxCount(boxName)
 
     if not itemGridScrollingFrame then return 0 end
 
+    -- Check both variations of newline spacing formats used by Roblox
     local itemNode = itemGridScrollingFrame:FindFirstChild("Item\010" .. boxName) 
         or itemGridScrollingFrame:FindFirstChild("Item\n" .. boxName)
 
@@ -66,7 +73,7 @@ end
 -- ===== BACKGROUND INDEPENDENT LOOPS =====
 local function runMegaBoxLoop()
     while true do
-        if autoBoxEnabled then -- Now tracking the exact same variable as the button click
+        if autoBoxEnabled then
             local count = getBoxCount("Mega Summer Random Box")
             if count > 0 then
                 fireChestPacket({ 34, 1, 0, 0, 0, 22, 0, 77, 101, 103, 97, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
@@ -99,7 +106,7 @@ end
 local function runNormalBoxLoop()
     while true do
         if autoBoxEnabled then
-            local count = getBoxEnabled and getBoxCount("Normal Summer Random Box")
+            local count = getBoxCount("Normal Summer Random Box")
             if count > 0 then
                 fireChestPacket({ 34, 1, 0, 0, 0, 24, 0, 78, 111, 114, 109, 97, 108, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
                 task.wait(CHEST_INTERVAL)
@@ -112,7 +119,7 @@ local function runNormalBoxLoop()
     end
 end
 
--- Start up the background automation routines
+-- Fire up independent execution threads
 task.spawn(runMegaBoxLoop)
 task.spawn(runRareBoxLoop)
 task.spawn(runNormalBoxLoop)
