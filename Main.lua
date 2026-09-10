@@ -1012,6 +1012,7 @@ updateBoxToggle()
 
 -- ===== AutoBox.lua =====
 -- ===== AUTO-CHEST LOGIC (FINAL WORKING VERSION) =====
+--im so fucking cool
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
