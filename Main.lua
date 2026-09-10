@@ -215,7 +215,7 @@ local function makeButton(name, text, layoutOrder)
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = Color3.fromRGB(235, 240, 250)
-    button.Font = Enum.Font.GothamSemibold
+    button.Font = Enum.Font.GothamMedium
     button.TextSize = 12
     button.AutoButtonColor = false
     button.Parent = frame
@@ -658,7 +658,7 @@ acceptBtn.MouseButton1Click:Connect(function()
 		liveWebhookUrl = urlInput.Text
 		acceptBtn.Text = "✓ URL Accepted"
 		task.delay(1.5, function()
-			accept Btn.Text = "Accept URL"
+			acceptBtn.Text = "Accept URL"
 		end)
 	end
 end)

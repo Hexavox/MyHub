@@ -322,7 +322,7 @@ acceptBtn.MouseButton1Click:Connect(function()
 		liveWebhookUrl = urlInput.Text
 		acceptBtn.Text = "✓ URL Accepted"
 		task.delay(1.5, function()
-			accept Btn.Text = "Accept URL"
+			acceptBtn.Text = "Accept URL"
 		end)
 	end
 end)

@@ -80,7 +80,7 @@ local function makeButton(name, text, layoutOrder)
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = Color3.fromRGB(235, 240, 250)
-    button.Font = Enum.Font.GothamSemibold
+    button.Font = Enum.Font.GothamMedium
     button.TextSize = 12
     button.AutoButtonColor = false
     button.Parent = frame
