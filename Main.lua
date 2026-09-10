@@ -338,6 +338,7 @@ end)
 local TextChatService = game:GetService("TextChatService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -355,30 +356,29 @@ end
 -- 1. BIOME DEFINITION CONFIG (Ordered exactly as requested with Wiki colors)
 local BIOME_CONFIG = {
     { ID = "Cyberspace",  Color = Color3.fromRGB(0, 100, 255),   Text = "Cyberspace" },
-    { ID = "Dreamspace",  Color = Color3.fromRGB(255, 140, 200),  Text = "Dreammetric" }, 
-    { ID = "Glitched",    Color = Color3.fromRGB(0, 255, 180),    Text = "Glitch" },
-    { ID = "Singularity", Color = Color3.fromRGB(130, 50, 255),   Text = "Singularity" },
-    { ID = "Null",        Color = Color3.fromRGB(150, 150, 150),  Text = "Null" },
-    { ID = "Corruption",  Color = Color3.fromRGB(180, 70, 255),   Text = "Corruption" },
-    { ID = "Heaven",      Color = Color3.fromRGB(255, 230, 100),  Text = "Heaven" },
-    { ID = "Starfall",    Color = Color3.fromRGB(90, 160, 255),   Text = "Starfall" },
-    { ID = "Hell",        Color = Color3.fromRGB(255, 60, 60),    Text = "Hell" },
-    { ID = "Sandstorm",   Color = Color3.fromRGB(240, 200, 110),  Text = "Sandstorm" },
-    { ID = "Rainy",       Color = Color3.fromRGB(140, 170, 190),  Text = "Rainy" },
-    { ID = "Snowy",       Color = Color3.fromRGB(200, 235, 255),  Text = "Snowy" },
-    { ID = "Windy",       Color = Color3.fromRGB(170, 255, 230),  Text = "Windy" },
-    { ID = "Blazing Sun", Color = Color3.fromRGB(236, 230, 46),   Text = "Blazing Sun" },
-    { ID = "Incinerator", Color = Color3.fromRGB(206, 128, 0),    Text = "Incinerator" }
+    { ID = "Dreamspace",  Color = Color3.fromRGB(255, 140, 200), Text = "Dreammetric" },
+    { ID = "Glitched",    Color = Color3.fromRGB(0, 255, 180),   Text = "Glitch" },
+    { ID = "Singularity", Color = Color3.fromRGB(130, 50, 255),  Text = "Singularity" },
+    { ID = "Null",        Color = Color3.fromRGB(150, 150, 150), Text = "Null" },
+    { ID = "Corruption",  Color = Color3.fromRGB(180, 70, 255),  Text = "Corruption" },
+    { ID = "Heaven",      Color = Color3.fromRGB(255, 230, 100), Text = "Heaven" },
+    { ID = "Starfall",    Color = Color3.fromRGB(90, 160, 255),  Text = "Starfall" },
+    { ID = "Hell",        Color = Color3.fromRGB(255, 60, 60),   Text = "Hell" },
+    { ID = "Sandstorm",   Color = Color3.fromRGB(240, 200, 110), Text = "Sandstorm" },
+    { ID = "Rainy",       Color = Color3.fromRGB(140, 170, 190), Text = "Rainy" },
+    { ID = "Snowy",       Color = Color3.fromRGB(200, 235, 255), Text = "Snowy" },
+    { ID = "Windy",       Color = Color3.fromRGB(170, 255, 230), Text = "Windy" },
+    { ID = "Blazing Sun", Color = Color3.fromRGB(236, 230, 46),  Text = "Blazing Sun" },
+    { ID = "Incinerator", Color = Color3.fromRGB(206, 128, 0),   Text = "Incinerator" }
 }
 
 -- Operational State Data Storage
 local biomeCounters = {}
-_G.BiomeFilterStates = {} 
-local liveWebhookUrl = "" -- Kept strictly local inside this upvalue space for security
+_G.BiomeFilterStates = {}
 
 for _, config in ipairs(BIOME_CONFIG) do
     biomeCounters[config.ID] = 0
-    _G.BiomeFilterStates[config.ID] = true 
+    _G.BiomeFilterStates[config.ID] = true
 end
 
 -- Biome Data Mapping Table (Using your exact updated rules and entries)
@@ -555,48 +555,82 @@ webhookContainer.Parent = frame
 
 local webLayout = Instance.new("UIListLayout")
 webLayout.SortOrder = Enum.SortOrder.LayoutOrder
-webLayout.Padding = UDim.new(0, 5)
+webLayout.Padding = UDim.new(0, 8)
 webLayout.Parent = webhookContainer
 
+-- Decorative Header Accent
+local panelHeader = Instance.new("TextLabel")
+panelHeader.Name = "PanelHeader"
+panelHeader.Size = UDim2.new(1, 0, 0, 16)
+panelHeader.BackgroundTransparency = 1
+panelHeader.Text = "DISCORD REMOTE NOTIFICATIONS"
+panelHeader.TextColor3 = Color3.fromRGB(110, 118, 138)
+panelHeader.Font = Enum.Font.GothamBold
+panelHeader.TextSize = 10
+panelHeader.TextXAlignment = Enum.TextXAlignment.Left
+panelHeader.LayoutOrder = 0
+panelHeader.Parent = webhookContainer
+
+-- Webhook Input Field
 local urlInput = Instance.new("TextBox")
 urlInput.Name = "UrlInputField"
-urlInput.Size = UDim2.new(1, 0, 0, 28)
-urlInput.BackgroundColor3 = Color3.fromRGB(30, 33, 43)
+urlInput.Size = UDim2.new(1, 0, 0, 32)
+urlInput.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
 urlInput.BorderSizePixel = 0
-urlInput.PlaceholderText = "Paste Webhook URL Here..."
+urlInput.PlaceholderText = "Paste Discord Webhook URL..."
 urlInput.Text = ""
 urlInput.ClearTextOnFocus = false
-urlInput.TextColor3 = Color3.fromRGB(230, 235, 245)
-urlInput.PlaceholderColor3 = Color3.fromRGB(100, 110, 125)
+urlInput.TextColor3 = Color3.fromRGB(240, 243, 250)
+urlInput.PlaceholderColor3 = Color3.fromRGB(75, 82, 98)
 urlInput.Font = Enum.Font.GothamMedium
-urlInput.TextSize = 11
+urlInput.TextSize = 12
+urlInput.TextTruncate = Enum.TextTruncate.AtEnd
 urlInput.LayoutOrder = 1
 urlInput.Parent = webhookContainer
 addCorner(urlInput, 6)
-addGlassStroke(urlInput, 0.8, 1)
+addGlassStroke(urlInput, 0.4, 1)
+
+-- Dedicated Private Server Link Input Field
+local psLinkInput = Instance.new("TextBox")
+psLinkInput.Name = "PsLinkInputField"
+psLinkInput.Size = UDim2.new(1, 0, 0, 32)
+psLinkInput.BackgroundColor3 = Color3.fromRGB(18, 20, 26)
+psLinkInput.BorderSizePixel = 0
+psLinkInput.PlaceholderText = "Paste Private Server Link Here..."
+psLinkInput.Text = ""
+psLinkInput.ClearTextOnFocus = false
+psLinkInput.TextColor3 = Color3.fromRGB(240, 243, 250)
+psLinkInput.PlaceholderColor3 = Color3.fromRGB(75, 82, 98)
+psLinkInput.Font = Enum.Font.GothamMedium
+psLinkInput.TextSize = 12
+psLinkInput.TextTruncate = Enum.TextTruncate.AtEnd
+psLinkInput.LayoutOrder = 2
+psLinkInput.Parent = webhookContainer
+addCorner(psLinkInput, 6)
+addGlassStroke(psLinkInput, 0.4, 1)
 
 local actionRow = Instance.new("Frame")
 actionRow.Name = "ActionRow"
-actionRow.Size = UDim2.new(1, 0, 0, 26)
+actionRow.Size = UDim2.new(1, 0, 0, 30)
 actionRow.BackgroundTransparency = 1
-actionRow.LayoutOrder = 2
+actionRow.LayoutOrder = 3
 actionRow.Parent = webhookContainer
 
 local rowLayout = Instance.new("UIListLayout")
 rowLayout.FillDirection = Enum.FillDirection.Horizontal
 rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
-rowLayout.Padding = UDim.new(0, 6)
+rowLayout.Padding = UDim.new(0, 8)
 rowLayout.Parent = actionRow
 
 local testBtn = Instance.new("TextButton")
 testBtn.Name = "TestButton"
-testBtn.Size = UDim2.new(0.5, -3, 1, 0)
-testBtn.BackgroundColor3 = Color3.fromRGB(60, 65, 80)
-testBtn.BackgroundTransparency = 0.4
+testBtn.Size = UDim2.new(0.5, -4, 1, 0)
+testBtn.BackgroundColor3 = Color3.fromRGB(48, 52, 66)
+testBtn.BackgroundTransparency = 0.2
 testBtn.Text = "Test Webhook"
-testBtn.TextColor3 = Color3.fromRGB(200, 205, 215)
-testBtn.TextTransparency = 0.6 -- Greyed out initially
-testBtn.Font = Enum.Font.GothamMedium
+testBtn.TextColor3 = Color3.fromRGB(250, 250, 250)
+testBtn.TextTransparency = 0.6
+testBtn.Font = Enum.Font.GothamBold
 testBtn.TextSize = 11
 testBtn.LayoutOrder = 1
 testBtn.Parent = actionRow
@@ -604,82 +638,138 @@ addCorner(testBtn, 6)
 
 local acceptBtn = Instance.new("TextButton")
 acceptBtn.Name = "AcceptButton"
-acceptBtn.Size = UDim2.new(0.5, -3, 1, 0)
-acceptBtn.BackgroundColor3 = Color3.fromRGB(45, 140, 90)
-acceptBtn.BackgroundTransparency = 0.4
+acceptBtn.Size = UDim2.new(0.5, -4, 1, 0)
+acceptBtn.BackgroundColor3 = Color3.fromRGB(28, 115, 75)
+acceptBtn.BackgroundTransparency = 0.3
 acceptBtn.Text = "Accept URL"
-acceptBtn.TextColor3 = Color3.fromRGB(200, 205, 215)
-acceptBtn.TextTransparency = 0.6 -- Greyed out initially
-acceptBtn.Font = Enum.Font.GothamMedium
+acceptBtn.TextColor3 = Color3.fromRGB(250, 250, 250)
+acceptBtn.TextTransparency = 0.6
+acceptBtn.Font = Enum.Font.GothamBold
 acceptBtn.TextSize = 11
 acceptBtn.LayoutOrder = 2
 acceptBtn.Parent = actionRow
 addCorner(acceptBtn, 6)
 
--- Helper to safely send requests to the server console executor link
-local function sendDiscordWebhook(targetUrl, contentString)
-	if not targetUrl or targetUrl == "" then return end
-	task.spawn(function()
-		local payload = HttpService:JSONEncode({content = contentString})
-		-- Using standard executor request implementations (wraps request/http.request/syn.request)
-		local requestFunc = firerequest or request or http_request or (syn and syn.request)
-		if requestFunc then
-			requestFunc({Url = targetUrl,Method = "POST",Headers = {["Content-Type"] = "application/json"},Body = payload})
-		end
-	end)
+-- Global/Script Reference Variable setup
+local liveWebhookUrl = ""
+local manualPrivateServerLink = "Not Provided"
+
+-- UI Interactive Animation Logic
+local function applyInteractiveStyles(btn, activeColor)
+    local defaultColor = btn.BackgroundColor3
+    btn.MouseEnter:Connect(function()
+        if btn.TextTransparency == 0 then
+            TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = activeColor}):Play()
+        end
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = defaultColor}):Play()
+    end)
+    btn.MouseButton1Down:Connect(function()
+        if btn.TextTransparency == 0 then
+            TweenService:Create(btn, TweenInfo.new(0.05), {
+                Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset, 1, -2)
+            }):Play()
+        end
+    end)
+    btn.MouseButton1Up:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.1), {
+            Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset, 1, 0)
+        }):Play()
+    end)
 end
 
--- Handles input changes to safely un-grey out choices when text contains elements
+applyInteractiveStyles(testBtn, Color3.fromRGB(64, 70, 89))
+applyInteractiveStyles(acceptBtn, Color3.fromRGB(36, 148, 96))
+
+-- Helper to safely fire requests via exploit environments
+local function sendDiscordWebhook(targetUrl, payloadTable)
+    if not targetUrl or targetUrl == "" then return end
+    task.spawn(function()
+        local payload = HttpService:JSONEncode(payloadTable)
+        local requestFunc = firerequest or request or http_request or (syn and syn.request)
+        if requestFunc then
+            requestFunc({
+                Url = targetUrl,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = payload
+            })
+        end
+    end)
+end
+
+-- Input Validation Engine
 local function validateUrlInput()
-	local cleanText = urlInput.Text:gsub("%s+", "")
-	local isValid = string.sub(cleanText, 1, 8) == "https://" and #cleanText > 15
+    local cleanText = urlInput.Text:gsub("%s+", "")
+    local isValid = string.sub(cleanText, 1, 8) == "https://" and #cleanText > 15
 
-	if isValid then
-		testBtn.TextTransparency = 0
-		acceptBtn.TextTransparency = 0
-	else
-		testBtn.TextTransparency = 0.6
-		acceptBtn.TextTransparency = 0.6
-	end
+    local targetTransparency = isValid and 0 or 0.6
+    TweenService:Create(testBtn, TweenInfo.new(0.2), {TextTransparency = targetTransparency}):Play()
+    TweenService:Create(acceptBtn, TweenInfo.new(0.2), {TextTransparency = targetTransparency}):Play()
 
-	return isValid
+    return isValid
 end
 
 urlInput:GetPropertyChangedSignal("Text"):Connect(validateUrlInput)
 
+-- Real Random Spoofed Discord Rich Embed Test Generation
 testBtn.MouseButton1Click:Connect(function()
-	if validateUrlInput() then
-		sendDiscordWebhook(urlInput.Text, "🧪 [Biome Tracker]: This is a test alert transmission! Webhook is working perfectly.")
-	end
+    if validateUrlInput() then
+        local dummyBiomes = {
+            {name = "Glitched", color = 5145599, icon = "https://images-ext-1.discordapp.net/external/_7v_NaxWRGklq5LfBljzsJHuIiNCgWtrgYW3FrjJ8DQ/%3Fcb%3D20260908005000/https/cdn.mongoosee.com/assets/biomes/GLITCHED.png?format=webp&quality=lossless"},
+            {name = "Dreamspace", color = 16720436, icon = "https://images-ext-1.discordapp.net/external/8hsQDCdsWnLFMfPIg5vZMGLEhUagcJkNXWcuwmmL498/%3Fcb%3D20260909131000/https/cdn.mongoosee.com/assets/biomes/DREAMSPACE.png?format=webp&quality=lossless"},
+            {name = "Cyberspace", color = 9044161, icon = "https://images-ext-1.discordapp.net/external/oo37uZgYl7TQynx-YDAVlNvF3QkLDFus8kRXWOnaNLM/%3Fcb%3D20260910001000/https/cdn.mongoosee.com/assets/biomes/CYBERSPACE.png?format=webp&quality=lossless"}
+        }
+        local picked = dummyBiomes[math.random(1, #dummyBiomes)]
+
+        local currentPSLink = psLinkInput.Text ~= "" and psLinkInput.Text or "https://roblox.com"
+
+        local mockEmbed = {
+            content = "📢 @" .. picked.name .. " Logger Ping",
+            embeds = {{
+                title = picked.name,
+                color = picked.color,
+                thumbnail = {
+                    url = picked.icon
+                },
+                fields = {
+                    {name = "Biome", value = "✨ " .. picked.name, inline = true},
+                    {name = "Author", value = "Roblox User", inline = true},
+                    {name = "Private Server Link", value = currentPSLink, inline = false}
+                }
+            }}
+        }
+        sendDiscordWebhook(urlInput.Text, mockEmbed)
+    end
 end)
 
 acceptBtn.MouseButton1Click:Connect(function()
-	if validateUrlInput() then
-		liveWebhookUrl = urlInput.Text
-		acceptBtn.Text = "✓ URL Accepted"
-		task.delay(1.5, function()
-			acceptBtn.Text = "Accept URL"
-		end)
-	end
+    if validateUrlInput() then
+        liveWebhookUrl = urlInput.Text
+        manualPrivateServerLink = psLinkInput.Text ~= "" and psLinkInput.Text or "Not Provided"
+        acceptBtn.Text = "✓ Data Saved"
+        task.delay(1.5, function()
+            acceptBtn.Text = "Accept URL"
+        end)
+    end
 end)
 
--- 4. REAL-TIME DATA PROCESSING PIPELIN
+-- 4. REAL-TIME DATA PROCESSING PIPELINE
 local function handleBiomeDetection(detectedString)
-	if string.find(detectedString, "Normal") then
-		currentBiomeLabel.Text = "Current: Normal"
-		currentBiomeLabel.TextColor3 = Color3.fromRGB(160, 168, 185)
-		return
-	end
+    if string.find(detectedString, "Normal") then
+        currentBiomeLabel.Text = "Current: Normal"
+        currentBiomeLabel.TextColor3 = Color3.fromRGB(160, 168, 185)
+        return
+    end
 
-	local targetID = detectedString
+    local targetID = detectedString
 
-	if biomeCounters[targetID] ~= nil then
-		biomeCounters[targetID] += 1
+    if biomeCounters[targetID] ~= nil then
+        biomeCounters[targetID] += 1
 
-		local matchConfig =
-			nil
-
-	        for _, config in ipairs(BIOME_CONFIG) do
+        local matchConfig = nil
+        for _, config in ipairs(BIOME_CONFIG) do
             if config.ID == targetID then
                 matchConfig = config
                 break
@@ -689,33 +779,78 @@ local function handleBiomeDetection(detectedString)
         if matchConfig then
             currentBiomeLabel.Text = "Current: " .. matchConfig.Text
             currentBiomeLabel.TextColor3 = matchConfig.Color
-            
+
             local activeMode = _G.BiomeFilterStates[targetID] and "ON" or "OFF"
             uiButtons[targetID].Text = string.format("  %s: %d  [%s]", matchConfig.Text, biomeCounters[targetID], activeMode)
-            
-            -- If checked ON and a webhook was successfully accepted, send logs
-            if _G.BiomeFilterStates[targetID] and liveWebhookUrl ~= "" then
-                local logMessage = string.format("🌍 New Biome Discovered: %s (Total Encountered: %d)", matchConfig.Text, biomeCounters[targetID])
-                sendDiscordWebhook(liveWebhookUrl, logMessage)
+
+            if _G.BiomeFilterStates[targetID] and liveWebhookUrl and liveWebhookUrl ~= "" then
+                local embedColor = math.floor(matchConfig.Color.R * 255) * 65536
+                                 + math.floor(matchConfig.Color.G * 255) * 256
+                                 + math.floor(matchConfig.Color.B * 255)
+
+                -- Select image dynamically depending on the tracked ID string name
+                local selectedThumbnail = "https://images-ext-1.discordapp.net/external/_7v_NaxWRGklq5LfBljzsJHuIiNCgWtrgYW3FrjJ8DQ/%3Fcb%3D20260908005000/https/cdn.mongoosee.com/assets/biomes/GLITCHED.png?format=webp&quality=lossless"
+
+                if string.lower(matchConfig.Text):find("dreamspace") then
+                    selectedThumbnail = "https://images-ext-1.discordapp.net/external/8hsQDCdsWnLFMfPIg5vZMGLEhUagcJkNXWcuwmmL498/%3Fcb%3D20260909131000/https/cdn.mongoosee.com/assets/biomes/DREAMSPACE.png?format=webp&quality=lossless"
+                elseif string.lower(matchConfig.Text):find("cyberspace") then
+                    selectedThumbnail = "https://images-ext-1.discordapp.net/external/oo37uZgYl7TQynx-YDAVlNvF3QkLDFus8kRXWOnaNLM/%3Fcb%3D20260910001000/https/cdn.mongoosee.com/assets/biomes/CYBERSPACE.png?format=webp&quality=lossless"
+                end
+
+                local currentPSLink = (manualPrivateServerLink ~= "Not Provided" and manualPrivateServerLink) or "roblox.com"
+
+                local logEmbed = {
+                    content = string.format("📢 @%s Logger Ping", matchConfig.Text),
+                    embeds = {
+                        {
+                            title = matchConfig.Text,
+                            color = embedColor,
+                            thumbnail = {
+                                url = selectedThumbnail
+                            },
+                            fields = {
+                                {
+                                    name = "Biome",
+                                    value = "✨ " .. matchConfig.Text,
+                                    inline = true
+                                },
+                                {
+                                    name = "Author",
+                                    value = "Roblox User",
+                                    inline = true
+                                },
+                                {
+                                    name = "Private Server Link",
+                                    value = currentPSLink,
+                                    inline = false
+                                }
+                            }
+                        }
+                    }
+                }
+
+                sendDiscordWebhook(liveWebhookUrl, logEmbed)
             end
         end
     end
 end
 
--- Intercept and map messages via new pipeline
-TextChatService.OnIncomingMessage = function(message)
-    if message.Text and message.Text ~= "" then
-        for pattern, biomeID in pairs(BIOME_DICTIONARY) do
-            if string.find(message.Text, escapePattern(pattern)) then
-                handleBiomeDetection(biomeID)
-                break
+-- Example hook into chat or system messages (adapt as needed for your game)
+-- This is just a template; wire this to however you detect biome messages.
+if TextChatService then
+    local ok, result = pcall(function()
+        return TextChatService.ChatMessageReceived
+    end)
+
+    if ok then
+        TextChatService.ChatMessageReceived:Connect(function(message)
+            local text = message.TextContent
+            if BIOME_DICTIONARY[text] then
+                handleBiomeDetection(BIOME_DICTIONARY[text])
             end
-        end
+        end)
     end
 end
-
-print("Biome Tracker fully initiated with readable text outlines and secure Webhook systems!")
-
 
 -- ===== GuiDragging.lua =====
 -- DRAGGING
