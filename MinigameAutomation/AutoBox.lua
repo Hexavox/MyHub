@@ -1,5 +1,4 @@
--- ===== AUTO-CHEST LOGIC (PACKET INJECTION ONLY) =====
-
+-- ===== CONFIGURATION & TOGGLES (Declared First!) =====
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
@@ -7,22 +6,27 @@ local LocalPlayer = Players.LocalPlayer
 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ByteNetEvent = ReplicatedStorage:WaitForChild("ByteNetReliable")
 
--- Configuration Constants
 local CHEST_INTERVAL = 6.5
-local MAX_BATCH = 10
+local autoBoxEnabled = false -- Declared at the very top so everything below can see it!
 
--- Initialize the toggle flag globally so your button can read/write to it easily
-_G.autoChestEnabled = false 
+-- ===== UI BUTTON SETUP =====
+-- Note: Make sure your custom 'makeButton' function is defined somewhere above this line!
+local autoBoxButton = makeButton("AutoBoxButton", "Auto-Box: OFF", 7)
 
+local function updateBoxToggle()
+    autoBoxButton.Text = autoBoxEnabled and "Auto-Box: ON" or "Auto-Box: OFF"
+    autoBoxButton.BackgroundTransparency = autoBoxEnabled and 0.84 or 0.95
+end
+
+autoBoxButton.MouseButton1Click:Connect(function()
+    autoBoxEnabled = not autoBoxEnabled -- Fixed name to match your loop variable
+    updateBoxToggle()
+end)
+
+
+-- ===== UTILITY FUNCTIONS =====
 -- Generic function to build and send the requested byte stream
-local function fireChestPacket(secondByte, lengthByte, nameString)
-    local bytes = {34, secondByte, 0, 0, 0, lengthByte, 0}
-    
-    -- Dynamically append the string ASCII character bytes
-    for i = 1, #nameString do
-        table.insert(bytes, string.byte(nameString, i))
-    end
-    
+local function fireChestPacket(bytes)
     local packetBuffer = buffer.create(#bytes)
     for i = 1, #bytes do
         buffer.writeu8(packetBuffer, i - 1, bytes[i])
@@ -30,66 +34,85 @@ local function fireChestPacket(secondByte, lengthByte, nameString)
     ByteNetEvent:FireServer(packetBuffer, nil)
 end
 
--- Safely parses the UI text properties to read the current numeric counts
+-- Safely fetches item counts from the inventory UI grid
 local function getBoxCount(boxName)
-    local path = playerGui:FindFirstChild("MainInterface")
-        and playerGui.MainInterface:FindFirstChild("Inventory")
-        and playerGui.MainInterface.Inventory:FindFirstChild("Items")
-        and playerGui.MainInterface.Inventory.Items:FindFirstChild("ItemGrid")
-        and playerGui.MainInterface.Inventory.Items.ItemGrid:FindFirstChild("ItemGridScrollingFrame")
-        
-    if not path then return 0 end
-    
-    local itemNode = path:FindFirstChild("Item\010" .. boxName)
-    if not itemNode then return 0 end
-    
-    local button = itemNode:FindFirstChild("Button")
-    local itemAmount = button and button:FindFirstChild("ItemAmount")
-    
-    if itemAmount then
-        local rawText = itemAmount.Text
-        return tonumber(string.match(rawText, "%d+")) or 0
+    local mainInterface = playerGui:FindFirstChild("MainInterface")
+    if not mainInterface then return 0 end
+
+    local itemGridScrollingFrame = mainInterface:FindFirstChild("Inventory")
+        and mainInterface.Inventory:FindFirstChild("Items")
+        and mainInterface.Inventory.Items:FindFirstChild("ItemGrid")
+        and mainInterface.Inventory.Items.ItemGrid:FindFirstChild("ItemGridScrollingFrame")
+
+    if not itemGridScrollingFrame then return 0 end
+
+    local itemNode = itemGridScrollingFrame:FindFirstChild("Item\010" .. boxName) 
+        or itemGridScrollingFrame:FindFirstChild("Item\n" .. boxName)
+
+    if itemNode then
+        local button = itemNode:FindFirstChild("Button")
+        if button then
+            local itemAmount = button:FindFirstChild("ItemAmount")
+            if itemAmount then
+                return tonumber(string.match(itemAmount.Text, "%d+")) or 0
+            end
+        end
     end
-    
+
     return 0
 end
 
--- Single execution cycle (Matching your Abyss Hunter logic style)
-local function executeChestCycle()
-    -- Only run if the global flag from your button is set to true
-    if not _G.autoChestEnabled then
-        return 1.0 -- Tells the loop to wait 1 second before trying again
-    end
 
-    -- Live inventory text value capture
-    local megaCount = getBoxCount("Mega Summer Random Box")
-    local rareCount = getBoxCount("Rare Summer Random Box")
-    local normalCount = getBoxCount("Normal Summer Random Box")
-    
-    if megaCount > 0 then
-        local batchSize = math.clamp(megaCount, 1, MAX_BATCH)
-        fireChestPacket(batchSize, 22, "Mega Summer Random Box")
-        return CHEST_INTERVAL
-        
-    elseif rareCount > 0 then
-        local batchSize = math.clamp(rareCount, 1, MAX_BATCH)
-        fireChestPacket(batchSize, 22, "Rare Summer Random Box")
-        return CHEST_INTERVAL
-        
-    elseif normalCount > 0 then
-        local batchSize = math.clamp(normalCount, 1, MAX_BATCH)
-        fireChestPacket(batchSize, 24, "Normal Summer Random Box")
-        return CHEST_INTERVAL
+-- ===== BACKGROUND INDEPENDENT LOOPS =====
+local function runMegaBoxLoop()
+    while true do
+        if autoBoxEnabled then -- Now tracking the exact same variable as the button click
+            local count = getBoxCount("Mega Summer Random Box")
+            if count > 0 then
+                fireChestPacket({ 34, 1, 0, 0, 0, 22, 0, 77, 101, 103, 97, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
+                task.wait(CHEST_INTERVAL)
+            else
+                task.wait(1.0)
+            end
+        else
+            task.wait(1.0)
+        end
     end
-    
-    return 1.0 -- No boxes found; wait 1 second before checking UI elements again
 end
 
--- Non-blocking constant execution loop
-task.spawn(function()
+local function runRareBoxLoop()
     while true do
-        local waitTime = executeChestCycle()
-        task.wait(waitTime)
+        if autoBoxEnabled then
+            local count = getBoxCount("Rare Summer Random Box")
+            if count > 0 then
+                fireChestPacket({ 34, 1, 0, 0, 0, 22, 0, 82, 97, 114, 101, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
+                task.wait(CHEST_INTERVAL)
+            else
+                task.wait(1.0)
+            end
+        else
+            task.wait(1.0)
+        end
     end
-end)
-print("AutoChest: Background loop started. Use your button to toggle the feature on/off.")
+end
+
+local function runNormalBoxLoop()
+    while true do
+        if autoBoxEnabled then
+            local count = getBoxEnabled and getBoxCount("Normal Summer Random Box")
+            if count > 0 then
+                fireChestPacket({ 34, 1, 0, 0, 0, 24, 0, 78, 111, 114, 109, 97, 108, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
+                task.wait(CHEST_INTERVAL)
+            else
+                task.wait(1.0)
+            end
+        else
+            task.wait(1.0)
+        end
+    end
+end
+
+-- Start up the background automation routines
+task.spawn(runMegaBoxLoop)
+task.spawn(runRareBoxLoop)
+task.spawn(runNormalBoxLoop)
