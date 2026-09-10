@@ -8,7 +8,8 @@ local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 local ByteNetEvent = ReplicatedStorage:WaitForChild("ByteNetReliable")
 
 -- Configuration Constants
-local CHEST_INTERVAL = 6.5
+local CHEST_INTERVAL = 7.5
+local MAX_BATCH = 10 -- Opens up to 10 boxes at a time
 
 print("[AutoChest]: Fixed Script loaded and monitoring your button toggle.")
 
@@ -59,7 +60,11 @@ local function runMegaBoxLoop()
         if autoBoxEnabled then -- FIXED: Changed from autoBox to your working button variable
             local count = getBoxCount("Mega Summer Random Box")
             if count > 0 then
-                fireChestPacket({ 34, 1, 0, 0, 0, 22, 0, 77, 101, 103, 97, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
+                -- Dynamically calculate batch size up to 10
+                local batchSize = math.clamp(count, 1, MAX_BATCH)
+                
+                -- Second byte is dynamically injected with your batchSize
+                fireChestPacket({ 34, batchSize, 0, 0, 0, 22, 0, 77, 101, 103, 97, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
                 task.wait(CHEST_INTERVAL)
             else
                 task.wait(1.0)
@@ -73,9 +78,16 @@ end
 local function runRareBoxLoop()
     while true do
         if autoBoxEnabled then -- FIXED: Changed from autoBox to your working button variable
+            local megaCount = getBoxCount("Mega Summer Random Box")
             local count = getBoxCount("Rare Summer Random Box")
-            if count > 0 then
-                fireChestPacket({ 34, 1, 0, 0, 0, 22, 0, 82, 97, 114, 101, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
+            
+            -- Only runs if you have 0 Megas left (Priority 1)
+            if megaCount == 0 and count > 0 then
+                -- Dynamically calculate batch size up to 10
+                local batchSize = math.clamp(count, 1, MAX_BATCH)
+                
+                -- Second byte is dynamically injected with your batchSize
+                fireChestPacket({ 34, batchSize, 0, 0, 0, 22, 0, 82, 97, 114, 101, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
                 task.wait(CHEST_INTERVAL)
             else
                 task.wait(1.0)
@@ -89,9 +101,17 @@ end
 local function runNormalBoxLoop()
     while true do
         if autoBoxEnabled then -- FIXED: Changed from autoBox to your working button variable
+            local megaCount = getBoxCount("Mega Summer Random Box")
+            local rareCount = getBoxCount("Rare Summer Random Box")
             local count = getBoxCount("Normal Summer Random Box")
-            if count > 0 then
-                fireChestPacket({ 34, 1, 0, 0, 0, 24, 0, 78, 111, 114, 109, 97, 108, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
+            
+            -- Only runs if you have 0 Megas and 0 Rares left (Priority 2)
+            if megaCount == 0 and rareCount == 0 and count > 0 then
+                -- Dynamically calculate batch size up to 10
+                local batchSize = math.clamp(count, 1, MAX_BATCH)
+                
+                -- Second byte is dynamically injected with your batchSize
+                fireChestPacket({ 34, batchSize, 0, 0, 0, 24, 0, 78, 111, 114, 109, 97, 108, 32, 83, 117, 109, 109, 101, 114, 32, 82, 97, 110, 100, 111, 109, 32, 66, 111, 120 })
                 task.wait(CHEST_INTERVAL)
             else
                 task.wait(1.0)
