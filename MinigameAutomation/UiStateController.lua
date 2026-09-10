@@ -28,3 +28,4 @@ end
 updateDeviceToggle()
 updateBoxesToggle()
 updatePathToggle()
+updateBoxToggle()
