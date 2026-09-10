@@ -17,7 +17,7 @@ ORDER = [
     "GuiDragging.lua",
     "PathContextMenu.lua",
     "UiStateController.lua",
-    "AutoBox.lua",
+    #"AutoBox.lua",
     "PathVisualization.lua",
     "WatermelonTracker.lua",
     "InteractionHelpers.lua",
