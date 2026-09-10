@@ -60,6 +60,11 @@ autoDeviceButton.MouseButton1Click:Connect(function()
     updateDeviceToggle()
 end)
 
+autoBoxButton.MouseButton1Click:Connect(function()
+    autoBoxEnabled = not autoBoxEnabled
+    updateBoxToggle()
+end)
+
 UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if contextMenu.Visible then

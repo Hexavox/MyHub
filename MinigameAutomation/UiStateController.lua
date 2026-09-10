@@ -20,6 +20,11 @@ local function updateDeviceToggle()
     autoDeviceButton.BackgroundTransparency = autoDeviceEnabled and 0.84 or 0.95
 end
 
+local function updateBoxToggle()
+    autoBoxButton.Text = autoBoxEnabled and "Auto-Box: ON" or "Auto-Box: OFF"
+    autoBoxButton.BackgroundTransparency = autoBoxEnabled and 0.84 or 0.95
+end
+
 updateDeviceToggle()
 updateBoxesToggle()
 updatePathToggle()
