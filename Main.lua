@@ -1690,11 +1690,11 @@ local function executeEquipCycle()
     end
 
     -- Send the alternative packet
-    fireEquipPacket({ 135, 64, 0, 0 })
+    fireEquipPacket({ 135, 60, 0, 0 })
     task.wait(0.1) -- Brief delay to let the server process the first swap
     
     -- Immediately swap back to the target aura packet
-    fireEquipPacket({ 135, 62, 0, 0 })
+    fireEquipPacket({ 135, 84, 0, 0 })
 end
 
 -- Non-blocking constant execution loop
